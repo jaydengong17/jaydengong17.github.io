@@ -23,7 +23,7 @@ I got this inspiration from [xkcd.com/2813/](https://xkcd.com/2813/).
 |**ampere**|A|???|???|???|
 |**kilogram**|kg|mass flow rate|spring stiffness|energy density stuff|
 |**candela**|cd|something is gaining brightness so that you will be permanently blind in ~ 6 hours|???|???|
-|**kelvin**|K|cooling rate|something is cooling more quickly ever second by 1K|???|
+|**kelvin**|K|cooling rate|something is cooling more quickly every second by 1K|???|
 |**moles**|mol|rates of various chemistry/biology things|???|???|
 
 There are many places filled with question marks.
