@@ -12,5 +12,5 @@ Welcome to my website. I named it Blagorf because this is my favorite meaningles
 ### <a href="{{ post.url }}">{{ post.title }}</a>
 {{ post.date | date: "%-d %B %Y" }}
 {{ post.excerpt }}
-<a href="{{ post.url }}">(more...)</a>
+<a href="{{ post.url }}">\[more...\]</a>
 {% endfor %}
