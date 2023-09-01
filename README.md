@@ -1,2 +1,3 @@
-# jaydengong17.github.io
+# Jayden's Blog
+
 Blagorf
