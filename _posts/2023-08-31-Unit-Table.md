@@ -8,7 +8,7 @@ excerpt_separator: <!--excerpt-->
 ---
 
 I recently made a table for all of the
-base SI units per second (to the 0, 1, 2, and 3).
+base SI units per second (to the power of 0, 1, 2, and 3).
 I got this inspiration from [xkcd.com/2813/](https://xkcd.com/2813/).
 
 
@@ -28,6 +28,4 @@ I got this inspiration from [xkcd.com/2813/](https://xkcd.com/2813/).
 
 There are many places filled with question marks.
 If you want to see more tables like these but with different per measurements,
-
 email me at jayden@jaydengong.com.
-
