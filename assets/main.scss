@@ -1,9 +1,25 @@
+---
+# This section is required by Jekyll to work.
+---
+
 @import "minima";
 
-.site-title::before {
-    content: url("/assets/images/logo.png");
+.site-title {
+    font-size: 35px !important;
+}
+
+.site-title::after {
+    background-image: url("/assets/images/logo.png");
+    background-size: cover;
+    content: "";
     display: inline-block;
-    height: 35px;
+    height: 40px;
+    left: 20px;
     position: relative;
-    top: 10px;
+    top: 8px;
+    width: 80px;
+}
+
+h3 {
+    margin-top: 35px;
 }
