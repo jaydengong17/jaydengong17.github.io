@@ -1,10 +1,44 @@
-<canvas id="canvas" width="800" height="600" style="border:1px solid #000000;"></canvas>
+<canvas id="canvas" width="400" height="300" style="border:1px solid #000000; margin: 10 px"></canvas>
 <script>
-  var ctx = document.getElementById("canvas").getContext("2d");
+  const canvas = document.getElementById("canvas")
+  const ctx = document.getElementById("canvas").getContext("2d");
 
-  ctx.beginPath();
-  ctx.lineWidth = "6";
-  ctx.strokeStyle = "red";
-  ctx.rect(5, 5, 290, 140);
-  ctx.stroke();
+  let pheromones = [];
+  
+  function pixel(x, y, color) {
+      this.x = x;
+      this.y = y;
+      this.color = color;
+      this.show = function (){
+          ctx.fillstyle = color;
+          ctx.linewidth = 0;
+          ctx.rect(x, y, x + 1, y + 1);
+      }
+  }
+
+  function agent(x, y, direction) {
+      this.x = x
+      this.y = y
+      this.direction = direction
+
+      this.Next = function (direction) {
+          this.x += Math.cos(direction * Math.PI)
+          this.y += Math.sin(direction * Math.PI)
+          this.direction = direction
+      }
+  }
+
+  let pixels = [];
+  for (let pixel_x = 0; pixel_x < canvas.width; pixel_x ++) {
+      let rows = [];
+      for (let pixel_y = 0; pixel_y < canvas.height; pixel_y ++) {
+          rows.push(pixel(pixel_x, pixel_y, `#ffffff`));
+      }
+  }
+
+  function Update() {
+      
+  }
+
+  setInterval(Update, 50);
 </script>
