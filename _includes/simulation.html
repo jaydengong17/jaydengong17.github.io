@@ -2,43 +2,114 @@
 <script>
   const canvas = document.getElementById("canvas")
   const ctx = document.getElementById("canvas").getContext("2d");
-
-  let pheromones = [];
-  
-  function pixel(x, y, color) {
-      this.x = x;
-      this.y = y;
-      this.color = color;
-      this.show = function (){
-          ctx.fillstyle = color;
-          ctx.linewidth = 0;
-          ctx.rect(x, y, x + 1, y + 1);
-      }
-  }
-
-  function agent(x, y, direction) {
-      this.x = x
-      this.y = y
-      this.direction = direction
-
-      this.Next = function (direction) {
-          this.x += Math.cos(direction * Math.PI)
-          this.y += Math.sin(direction * Math.PI)
-          this.direction = direction
-      }
-  }
+  const num_agents = 10;
+  const directions = [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]]
 
   let pixels = [];
-  for (let pixel_x = 0; pixel_x < canvas.width; pixel_x ++) {
-      let rows = [];
-      for (let pixel_y = 0; pixel_y < canvas.height; pixel_y ++) {
-          rows.push(pixel(pixel_x, pixel_y, `#ffffff`));
+  let agents = [];
+    
+  class Pixel{
+      constructor(x, y, color) {
+          this.x = x;
+          this.y = y;
+          this.pheromone = 0;
+          this.prev = 0;
+      }
+
+      show(ctx) {
+          var shade = Math.floor(this.pheromone * 255);
+          ctx.fillStyle = "rgba(" + shade + ", " + shade + ", " + shade + ", " + "1)";
+          ctx.fillRect(this.x, this.y, 1, 1);
+
+          this.pheromone = Math.max(0, this.pheromone - 1);
       }
   }
 
-  function Update() {
-      
+  class Agent{
+      constructor(x, y, direction) {
+          this.x = x;
+          this.y = y;
+          this.direction = direction;
+      }
+
+      next(direction) {
+          this.direction = direction;
+          this.x += direction[0];
+          this.y += direction[1];
+          if (this.x > canvas.width) {
+              this.x = canvas.width;
+              this.direction = directions[(-directions.indexOf(this.direction) + 4) % 8];
+          } else if(this.x < 0) {
+              this.x = 0;
+              this.direction = directions[(-directions.indexOf(this.direction) + 4) % 8];
+          }
+          if (this.y > canvas.height) {
+              this.y = canvas.height;
+              this.direction = directions[-directions.indexOf(this.direction) + 8];
+          } else if(this.y < 0) {
+              this.y = 0;
+              this.direction = directions[-directions.indexOf(this.direction) + 8];
+          }
+//          console.log(this.direction);
+
+          pixels[this.x][this.y].pheromone = 0xf;
+      }
+  }
+ 
+  function getPheromone(x, y) {
+      if (x < 0 || x > canvas.width || y < 0 || y > canvas.height) {
+          return 0
+      }
+      return pixels[x][y].pheromone;
   }
 
-  setInterval(Update, 50);
+  function update() {
+      for (let update_agent = 0; update_agent < num_agents; update_agent ++) {
+          const now = agents[update_agent];
+          let currDir = directions.indexOf(now.direction);
+          let bestDir = directions.indexOf(now.direction);
+          //console.log(bestDir, now.direction)
+          let bestPheromone = getPheromone(now.x + directions[bestDir][0],
+                                           now.y + directions[bestDir][1]);
+          
+          for (let trydir = -1; trydir < 2; trydir ++){
+              let new_dir = (trydir + currDir + 8) % 8;
+              currPixel_x = now.x + directions[new_dir][0];
+              currPixel_y = now.y + directions[new_dir][1];
+              currPheromone = getPheromone(currPixel_x, currPixel_y);
+              
+              if (currPheromone > bestPheromone) {
+                  bestPheromone = currPheromone;
+                  bestDir = (currDir + trydir) % 8;
+              }
+          }
+          //console.log(bestDir);
+          //console.log(directions[bestDir]);
+          now.next(directions[bestDir]);
+          //console.log("next")    
+      }
+
+      for(let updatePixel_x = 0; updatePixel_x < canvas.width; updatePixel_x ++) {
+          for (let updatePixel_y = 0; updatePixel_y < canvas.height; updatePixel_y ++) {
+              pixels[updatePixel_x][updatePixel_y].show(ctx);
+          }
+      }
+  }
+
+  for (let pixel_x = 0; pixel_x <= canvas.width; pixel_x ++) {
+      let row = [];
+      for (let pixel_y = 0; pixel_y <= canvas.height; pixel_y ++) {
+          row.push(new Pixel(pixel_x, pixel_y, `#ffffff`));
+      }
+      pixels.push(row);
+  }
+
+  
+  for (let i = 0; i < num_agents; i ++) {
+      agents.push(new Agent(Math.floor(Math.random() * canvas.width),
+                            Math.floor(Math.random() * canvas.height),
+                            directions[Math.floor(Math.random() * 8)]));
+  }
+
+  setInterval(update, 50);
 </script>
