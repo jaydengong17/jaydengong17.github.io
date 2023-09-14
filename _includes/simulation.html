@@ -1,12 +1,12 @@
-<canvas id="canvas" width="400" height="300" style="border:1px solid #000000; margin: 10 px"></canvas>
+<canvas id="canvas" width="800" height="600" style="border:1px solid #000000; margin: 10 px"></canvas>
 <script>
   const canvas = document.getElementById("canvas")
   const ctx = document.getElementById("canvas").getContext("2d");
-  const num_agents = 10;
+  const num_agents = 50;
   const directions = [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]]
   const square_side = 10
-  const real_width = canvas.width / square_side
-  const real_height = canvas.height / square_side
+  const real_width = canvas.width / square_side - 1
+  const real_height = canvas.height / square_side - 1
 
   let pixels = [];
   let agents = [];
@@ -34,29 +34,36 @@
           this.x = x;
           this.y = y;
           this.direction = direction;
+          this.index = directions.indexOf(this.direction);
       }
 
       next(direction) {
           this.direction = direction;
+          this.index = directions.indexOf(this.direction)
           this.x += direction[0];
           this.y += direction[1];
           if (this.x > real_width) {
               this.x = real_width;
-              this.direction = directions[(-directions.indexOf(this.direction) + 12) % 8];
+              this.direction = directions[(-this.index + 12) % 8];
           } else if(this.x < 0) {
               this.x = 0;
-              this.direction = directions[(-directions.indexOf(this.direction) + 12) % 8];
+              this.direction = directions[(-this.index + 12) % 8];
           }
           if (this.y > real_height) {
               this.y = real_height;
-              this.direction = directions[(-directions.indexOf(this.direction) + 8) % 8];
+              this.direction = directions[(-this.index + 8) % 8];
           } else if(this.y < 0) {
               this.y = 0;
-              this.direction = directions[(-directions.indexOf(this.direction) + 8) % 8];
+              this.direction = directions[(-this.index + 8) % 8];
           }
 
+          this.index = (directions.indexOf(this.direction) + nonUniformRandom() + 8) % 8;
           pixels[this.x][this.y].pheromone = 0xF;
       }
+  }
+
+  function nonUniformRandom() {
+      return Math.round((2 * (Math.random() - 0.5)) ** 7);
   }
  
   function getPheromone(x, y) {
@@ -69,8 +76,8 @@
   function update() {
       for (let update_agent = 0; update_agent < num_agents; update_agent ++) {
           const now = agents[update_agent];
-          let currDir = directions.indexOf(now.direction);
-          let bestDir = directions.indexOf(now.direction);
+          let currDir = now.index;
+          let bestDir = now.index;
           let bestPheromone = getPheromone(now.x + directions[bestDir][0],
                                            now.y + directions[bestDir][1]);
           
@@ -88,8 +95,8 @@
           now.next(directions[bestDir]);
       }
 
-      for(let updatePixel_x = 0; updatePixel_x < real_width; updatePixel_x ++) {
-          for (let updatePixel_y = 0; updatePixel_y < real_height; updatePixel_y ++) {
+      for(let updatePixel_x = 0; updatePixel_x <= real_width; updatePixel_x ++) {
+          for (let updatePixel_y = 0; updatePixel_y <= real_height; updatePixel_y ++) {
               pixels[updatePixel_x][updatePixel_y].show(ctx);
           }
       }
@@ -110,5 +117,18 @@
                             directions[Math.floor(Math.random() * 8)]));
   }
 
-  setInterval(update, 50);
+  Loop = setInterval(update, 50);
+
+  function getInfo() {
+      if (Loop != null){
+          clearInterval(Loop);
+          Loop = null;
+          document.getElementById("something").innerHTML = "Start";
+      }else{
+          Loop = setInterval(update, 50);
+          document.getElementById("something").innerHTML = "Stop";
+      }
+      
+  }
 </script>
+<button type="button" onclick="getInfo()" id="something">Stop</button>
