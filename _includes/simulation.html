@@ -1,13 +1,16 @@
-<canvas id="canvas" width="800" height="600" style="border:1px solid #000000; margin: 10 px"></canvas>
+<canvas id="canvas" width="100" height="100" style="border:1px solid #000000; margin: 10 px"></canvas>
 <script>
-  const canvas = document.getElementById("canvas")
+  const canvas = document.getElementById("canvas");
   const ctx = document.getElementById("canvas").getContext("2d");
-  const num_agents = 50;
-  const directions = [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]]
-  const square_side = 10
-  const real_width = canvas.width / square_side - 1
-  const real_height = canvas.height / square_side - 1
-
+  const directions = [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]];
+  
+  let square_side = null;
+  let num_agents = null;
+  let Loop = null;
+  let real_width = null;
+  let real_height = null;
+  let turn_change = null;
+  
   let pixels = [];
   let agents = [];
     
@@ -63,7 +66,7 @@
   }
 
   function nonUniformRandom() {
-      return Math.round((2 * (Math.random() - 0.5)) ** 7);
+      return Math.round((2 * (Math.random() - 0.5)) * (turn_chance - 1) / turn_chance);
   }
  
   function getPheromone(x, y) {
@@ -102,33 +105,56 @@
       }
   }
 
-  for (let pixel_x = 0; pixel_x <= real_width; pixel_x ++) {
-      let row = [];
-      for (let pixel_y = 0; pixel_y <= real_height; pixel_y ++) {
-          row.push(new Pixel(pixel_x, pixel_y));
+  function setup() {
+      agents = [];
+      pixels = [];
+      
+      for (let pixel_x = 0; pixel_x <= real_width; pixel_x ++) {
+          let row = [];
+          for (let pixel_y = 0; pixel_y <= real_height; pixel_y ++) {
+              row.push(new Pixel(pixel_x, pixel_y));
+          }
+          pixels.push(row);
       }
-      pixels.push(row);
+      
+      for (let i = 0; i < num_agents; i ++) {
+          agents.push(new Agent(Math.floor(Math.random() * real_width),
+                                Math.floor(Math.random() * real_height),
+                                directions[Math.floor(Math.random() * 8)]));
+      }
   }
-
-  
-  for (let i = 0; i < num_agents; i ++) {
-      agents.push(new Agent(Math.floor(Math.random() * real_width),
-                            Math.floor(Math.random() * real_height),
-                            directions[Math.floor(Math.random() * 8)]));
-  }
-
-  Loop = setInterval(update, 50);
 
   function getInfo() {
       if (Loop != null){
           clearInterval(Loop);
           Loop = null;
           document.getElementById("something").innerHTML = "Start";
-      }else{
+      } else {
+          canvas.width = document.getElementById("width").value;
+          canvas.height = document.getElementById("height").value;
+          square_side = document.getElementById("size").value;
+          num_agents = document.getElementById("Agents").value;
+          turn_chance = document.getElementById("random_turn").value;
+          real_width = canvas.width / square_side - 1;
+          real_height = canvas.height / square_side - 1;
+          setup();
           Loop = setInterval(update, 50);
           document.getElementById("something").innerHTML = "Stop";
       }
       
   }
 </script>
-<button type="button" onclick="getInfo()" id="something">Stop</button>
+<p>Enter the values below and then press the Start button.</p>
+
+<p>Width (ex. 500, 600):</p>
+<input type="text" id="width">
+<p>Height (ex. 300, 400):</p>
+<input type="text" id="height">
+<p>Pixel size (must be a factor of both width and height):</p>
+<input type="text" id="size">
+<p>Number of Agents (ex. 10, 50):</p>
+<input type="text" id="Agents">
+<p>Random turn chance (every one out of ... tries will make the agent turn):</p>
+<input type="text" id="random_turn">
+
+<button type="button" onclick="getInfo()" id="something">Start</button>
