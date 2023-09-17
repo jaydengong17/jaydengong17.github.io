@@ -9,8 +9,6 @@ excerpt_seperator: <!--excerpt-->
 
 I made a channel. This is my first video about my rubiks cubes.
 
-<!--excerpt-->
-
 <iframe
         width="560"
         height="315"
@@ -20,3 +18,5 @@ I made a channel. This is my first video about my rubiks cubes.
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowfullscreen>
 </iframe>
+
+<!--excerpt-->
