@@ -8,3 +8,6 @@ header_pages:
   - spirograph.md
   - diary.md
   - about.md
+collections:
+  diaries:
+    output: true

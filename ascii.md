@@ -75,13 +75,13 @@ I created a lot of ASCII art while chatting with my friends during zoom meetings
   </tr>
   <tr>
     <td>
-      scroll from
+      scroll from diary
     </td>
     <td>
       <pre>
        ____________
-      (•\	   \
-      	|~~~~~~    |
+      (•\          \
+        |~~~~~~    |
         |~~~~      |
         |          |
         |          |
@@ -194,24 +194,24 @@ I created a lot of ASCII art while chatting with my friends during zoom meetings
   </tr>
   <tr>
     <td>
-      that's actually okay from blog. "today, 7/28/2022"
+      that's actually okay from diary. "today, 7/28/2022"
     </td>
     <td>
       <pre>
-             _______
-         ,--'\  |  /'--,
-        /    |  |  |    \
-       |      | | |      |
-      |-------|-|-|-------|
-       |      | | |      |
-        \    |  |  |    /
-         '--,/__|__\,--'
+            _______
+         ,-'\  |  /'-,
+        /   |  |  |   \
+       |    |  |  |    |
+      |-----|--|--|-----|
+       |    |  |  |    |
+        \   |  |  |   /
+         '-,/__|__\,-'
       </pre>
     </td>
   </tr>
   <tr>
     <td>
-      from blog. "today, 7/29/2022"
+      from diary. "today, 7/29/2022"
     </td>
     <td>
       <pre>
@@ -225,11 +225,11 @@ I created a lot of ASCII art while chatting with my friends during zoom meetings
   </tr>
   <tr>
     <td>
-      Still from blog "yesterday, 7/30/2022"
+      Still from diary "yesterday, 7/30/2022"
     </td>
     <td>
       <pre>
-       ___      ____      _____       __    __
+       ____     _____      ____       __    __
       /  __|    |_  _|    /   _\      | |   | |
      |  |__       | |    |   /        | |___| |
       \__  \      | |    |   | ____   |  ___  |
@@ -240,11 +240,11 @@ I created a lot of ASCII art while chatting with my friends during zoom meetings
   </tr>
   <tr>
     <td>
-      still from blog "today, 8/3/2022"
+      still from diary "today, 8/3/2022"
     </td>
     <td>
       <pre>
-            __             _________          __                                               
+            __             _________          __
            /\_\           /\________\        /\_\ 
           / / /          / / _____  /       / / / 
          / / /          / / /  / / /       / / /  
@@ -257,7 +257,23 @@ I created a lot of ASCII art while chatting with my friends during zoom meetings
   </tr>
   <tr>
     <td>
-      Finally not from blog. Pretty self-explanatory
+      still from diary "today, 8/4/2022"
+    </td>
+    <td>
+      <pre>
+           stonks
+       ______________
+      |             /|
+      |    /\   _  / |
+      |  -'  |_| \/  |
+      '___|__|____|__'
+         aug nov sep
+      </pre>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      Finally not from diary. Pretty self-explanatory
     </td>
     <td>
       <pre>
