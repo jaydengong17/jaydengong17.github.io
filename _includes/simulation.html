@@ -66,7 +66,10 @@
   }
 
   function nonUniformRandom() {
-      return Math.round((2 * (Math.random() - 0.5)) * (turn_chance - 1) / turn_chance);
+      if (turn_chance == 1) {
+          return 2 * Math.round(Math.random()) - 1
+      }
+      return Math.round((Math.random() - 0.5) * turn_chance / (turn_chance - 1));
   }
  
   function getPheromone(x, y) {
