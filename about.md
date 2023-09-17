@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: post
 theme: minima
 title: About
 permalink: /about/

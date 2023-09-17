@@ -1,6 +1,6 @@
 ---
-layout: default
-title: Home
+layout: post
+title: Blog
 ---
 
 Hi. My name is Jayden. I am a 6th grader living in the sunny San Francisco bay area.
