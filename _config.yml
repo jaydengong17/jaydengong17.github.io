@@ -2,3 +2,7 @@ theme: minima
 title: Blagorf
 author: Jayden Gong
 excerpt_separator: <!--excerpt-->
+header_pages:
+  - index.md
+  - spirograph.md
+  - about.md
