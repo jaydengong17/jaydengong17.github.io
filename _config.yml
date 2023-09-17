@@ -11,3 +11,4 @@ header_pages:
 collections:
   diaries:
     output: true
+google_analytics: true
