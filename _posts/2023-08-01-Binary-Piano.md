@@ -15,15 +15,8 @@ We were supposed to figure out what he was playing,
 and I got the answer pretty quick: he was counting in binary.
 
 Example:
-<iframe
-        width="560"
-        height="315"
-        src="https://www.youtube.com/embed/03i7rMulyGo"
-        title="YouTube video player"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen>
-</iframe>
+
+{% include youtube.html id='03i7rMulyGo' %}
 
 You probably have at least one of these questions right now:
 

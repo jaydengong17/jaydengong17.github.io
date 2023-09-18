@@ -16,14 +16,6 @@ they are not magnets themselves.
 The higher the amount of turns (times you wrapped the wire), the better.
 This is the reason electromagnet V1 didn't work.
 
-<iframe
-        width="560"
-        height="315"
-        src="https://www.youtube.com/embed/0fg3OCkLQGA "
-        title="YouTube video player"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen>
-</iframe>
+{% include youtube.html id='0fg3OCkLQGA' %}
 
 <!--excerpt-->

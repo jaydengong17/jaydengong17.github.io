@@ -9,14 +9,6 @@ excerpt_seperator: <!--excerpt-->
 
 I made a channel. This is my first video about my rubiks cubes.
 
-<iframe
-        width="560"
-        height="315"
-        src="https://www.youtube.com/embed/m_2cU_0Y01o?si=RKRZS13jXbWkgypH"
-        title="YouTube video player"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen>
-</iframe>
+{% include youtube.html id='m_2cU_0Y01o' %}
 
 <!--excerpt-->

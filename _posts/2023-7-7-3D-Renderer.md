@@ -20,14 +20,6 @@ but also how you get to that equation.
 
 Link to the scratch project: https://scratch.mit.edu/projects/871926401/
 
-<iframe
-        width="560"
-        height="315"
-        src="https://www.youtube.com/embed/B0i0GSEXQXw"
-        title="YouTube video player"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen>
-</iframe>
+{% include youtube.html id='B0i0GSEXQXw' %}
 
 <!--excerpt-->
