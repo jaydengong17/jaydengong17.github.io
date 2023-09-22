@@ -1,0 +1,80 @@
+<canvas id="canvas" width="400" height="400" style="margin: 10 px"></canvas>
+<script>
+  const canvas = document.getElementById("canvas");
+  const ctx = document.getElementById("canvas").getContext("2d");
+
+  let accuracy = 100;
+  
+  class Pixel{
+      constructor(x, y) {
+          this.x = x;
+          this.y = y;
+      }
+
+      show(rgb) {
+          ctx.fillStyle = "rgba(" + rgb + ", 1)";
+          ctx.fillRect(this.x, this.y, 1, 1);
+      }
+  }
+
+  pixels = []
+  for (let pixel_x = 0; pixel_x < canvas.width; pixel_x ++) {
+      row = []
+      for (let pixel_y = 0; pixel_y < canvas.width; pixel_y ++) {
+          row.push(new Pixel(pixel_x, pixel_y));
+      }
+      pixels.push(row);
+  }
+
+  function distance(a,b){
+      return Math.sqrt(a ** 2 + b ** 2);
+  }
+  
+  function calc_point(x, y){
+      let r = 0;
+      let i = 0;
+      let r_new = 0;
+      let i_new = 0;
+      for (let check = 0; check < accuracy; check ++){
+          r_new = r ** 2 - i ** 2;
+          i_new = 2 * r * i;
+          r = r_new;
+          i = i_new;
+          r += x;
+          i += y;
+          if (distance(r, i) > 2) {
+              return check;
+          }
+      }
+      return "stable";
+  }
+
+  function hue_rgb(hue){
+      r = Math.max(Math.cos(2 * Math.PI * hue), 0);
+      g = Math.max(Math.cos(2 * Math.PI * (hue - 1/3)), 0);
+      b = Math.max(Math.cos(2 * Math.PI * (hue + 1/3)), 0);
+      return 255 * Math.sqrt(r) + "," + 255 * Math.sqrt(g) + "," + 255 * Math.sqrt(b);
+  }
+
+  function render(){
+      accuracy = document.getElementById("in_accuracy").value;
+      log_accuracy = accuracy > 1 ? Math.log2(accuracy) : 1
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let width = 0; width < canvas.width; width ++){
+          for (let height = 0; height < canvas.height; height ++){
+              result = calc_point(width / canvas.width * 4 - 2, height / canvas.width * 4 - 2);
+              if (result === "stable"){
+                  pixels[width][height].show("0, 0, 0");
+              } else(
+                  pixels[width][height].show(hue_rgb(Math.log10(result) / log_accuracy))
+              )
+          }
+      }
+  }
+  
+</script>
+
+<p>Accuracy (how many repetitions of checking)</p>
+<input type="text" id="in_accuracy">
+
+<button type="button" onclick="render()" id="">Render</button>
