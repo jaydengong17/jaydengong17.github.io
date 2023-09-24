@@ -7,7 +7,8 @@ author: "Jayden Gong"
 excerpt_seperator: <!--excerpt-->
 ---
 
-This is the Mandelbrot set.
+This post is about the Mandelbrot set. I also included a rendering of the Mandelbrot set
+, with zooming capabilities.
 
 {% include mandelbrot_set.html%}
 <!--excerpt-->
@@ -22,7 +23,7 @@ $$f(0)$$ is defined to be $$c$$ (or more percisely, $$f(0) = 0^2 + c$$).
 The places where $$f(n)$$, as $$n\to\infty$$ doesn't diverge are the Mandelbrot Set.
 
 But then, why are there colors in some places?
-The color encodes how fast that that starting place will diverge to infinity.
+The color encodes how fast that starting place will diverge to infinity.
 Specifically, it looks at how quickly it reaches a distance of more than 2 from the origin
 (because it is proven that if it does, it will diverge to infinity),
 and colors it dependent on how many steps it takes before it reaches that border. 

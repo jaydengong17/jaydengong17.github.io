@@ -4,6 +4,11 @@
   const ctx = document.getElementById("canvas").getContext("2d");
 
   let accuracy = 100;
+  //zoom is 1/4 to make sure it will show from -2 to 2
+  let zoom = 1/4;
+  // x and y are measured from the origin
+  let zoom_x = 0;
+  let zoom_y = 0;
   
   class Pixel{
       constructor(x, y) {
@@ -56,13 +61,26 @@
       return 255 * Math.sqrt(r) + "," + 255 * Math.sqrt(g) + "," + 255 * Math.sqrt(b);
   }
 
-  function render(){
+  function render(zoomby, xby, yby, reset){
+      if (reset){
+          zoom = 1/4;
+          zoom_x = 0;
+          zoom_y = 0;
+      } else {
+          zoom *= zoomby;
+          zoom_x += xby / zoom;
+          zoom_y += yby / zoom;
+      }
       accuracy = document.getElementById("in_accuracy").value;
-      log_accuracy = accuracy > 1 ? Math.log2(accuracy) : 1
+      log_accuracy = accuracy > 1 ? Math.log2(accuracy) : 1;
+            
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      console.log(zoom_x, zoom_y);
       for (let width = 0; width < canvas.width; width ++){
+          let zoomed_width = (width / canvas.width - 0.5) / zoom + zoom_x
           for (let height = 0; height < canvas.height; height ++){
-              result = calc_point(width / canvas.width * 4 - 2, height / canvas.width * 4 - 2);
+              let zoomed_height = (height / canvas.width - 0.5) / zoom + zoom_y
+              result = calc_point(zoomed_width, zoomed_height);
               if (result === "stable"){
                   pixels[width][height].show("0, 0, 0");
               } else(
@@ -76,5 +94,32 @@
 
 <p>Accuracy (how many repetitions of checking)</p>
 <input type="text" id="in_accuracy">
+<button type="button" onclick="render(1, 0, 0, false)" id="">Render</button>
+<button type="button" onclick="render(0, 0, 0, true)" id="">Home</button>
 
-<button type="button" onclick="render()" id="">Render</button>
+<style>
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  margin: 10px 0 20px 0;
+  width: 200px;
+}
+.grid-container button {
+  width: 50px;
+}
+.grid-item {
+  text-align: center;
+}
+</style>
+
+<div class="grid-container">
+  <div class="grid-item"></div>
+  <div class="grid-item"><button type="button" onclick="render(1, 0, -0.5, false)" id=""> Up </button></div>
+  <div class="grid-item"></div>  
+  <div class="grid-item"><button type="button" onclick="render(1, -0.5, 0, false)" id="">Left</button></div>
+  <div class="grid-item"><button type="button" onclick="render(2, 0, 0, false)" id="">Zoom</button></div>
+  <div class="grid-item"><button type="button" onclick="render(1, 0.5, 0, false)" id="">Right</button></div>  
+  <div class="grid-item"></div>
+  <div class="grid-item"><button type="button" onclick="render(1, 0, 0.5, false)" id="">Down</button></div>
+  <div class="grid-item"></div>  
+</div>
