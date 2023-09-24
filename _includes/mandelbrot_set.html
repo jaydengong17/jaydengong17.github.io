@@ -3,7 +3,7 @@
   const canvas = document.getElementById("canvas");
   const ctx = document.getElementById("canvas").getContext("2d");
 
-  let accuracy = 100;
+  let accuracy = 10;
   //zoom is 1/4 to make sure it will show from -2 to 2
   let zoom = 1/4;
   // x and y are measured from the origin
@@ -75,7 +75,6 @@
       log_accuracy = accuracy > 1 ? Math.log2(accuracy) : 1;
             
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      console.log(zoom_x, zoom_y);
       for (let width = 0; width < canvas.width; width ++){
           let zoomed_width = (width / canvas.width - 0.5) / zoom + zoom_x
           for (let height = 0; height < canvas.height; height ++){
@@ -90,11 +89,11 @@
       }
   }
 
-  // render(1, 0, 0, false);
+  window.onload = function() { render(1, 0, 0, false); };
 </script>
 
 <p>Accuracy (how many repetitions of checking)</p>
-<input type="text" id="in_accuracy">
+<input type="text" id="in_accuracy" value="10">
 <button type="button" onclick="render(1, 0, 0, false)" id="">Render</button>
 <button type="button" onclick="render(0, 0, 0, true)" id="">Home</button>
 
