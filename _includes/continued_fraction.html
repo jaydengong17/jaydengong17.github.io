@@ -1,0 +1,57 @@
+<script>
+  function formatList(){
+      let input_list = document.getElementById("list");
+      let stringValues = input_list.value.split(",");
+      let formatted_list = stringValues.map(function(str) {
+          return parseInt(str);});
+      return formatted_list
+  }
+
+  function evaluateFraction(){
+      let start = formatList();
+      let table = document.getElementById("table_body");
+      let repeat = (document.querySelector('input[name="repitition"]:checked').value == "yes");
+
+      table.innerHTML = "";
+      for (let number = (repeat ? 0: start.length - 1); number < start.length; number ++) {
+          let currentNumerator = start[start.length - 1];
+          let currentDenominator = 1;
+          for (let i = number - 1; i >= 0; i--) {
+              nextDenominator = currentNumerator;
+              currentNumerator = currentDenominator + start[i] * currentNumerator;
+              currentDenominator = nextDenominator;
+              console.log(currentDenominator, currentNumerator);
+          }
+      
+          let new_row = table.insertRow(-1);
+          for (let insert = 0; insert < 3; insert ++){
+              new_row.insertCell(-1);
+          }
+          new_row.cells[0].innerHTML = repeat? number + 1 : "all";
+          new_row.cells[1].innerHTML = currentNumerator + (number == 0? "" : "/" + currentDenominator);
+          new_row.cells[2].innerHTML = currentNumerator / currentDenominator;
+      }
+  }
+</script>
+
+<table id="output_table">
+  <thead>
+    <td>If you used the first ... numbers</td>
+    <td>Fraction</td>
+    <td>Value</td>
+  </thead>
+  <tbody id="table_body">
+  </tbody>
+</table>
+<p>Enter values below as a list seperated by commas (ex. a,b,c,d,e,...)</p>
+<input type="text" id="list">
+<button onclick="evaluateFraction()"> Go </button>
+<br>
+<b>WARNING: IF YOU ENTER A LARGE NUMBER OF ITEMS AND TURN ON THE OPTION BELOW, YOU WILL NEED TO FORCE QUIT YOUR BROWSER.</b>
+<br>
+Solve for every first N numbers:
+<input type="radio" id="repitition-yes" name="repitition" value="yes">
+<label for="repitition-yes">yes</label>
+<input type="radio" id="repitition-no" name="repitition" value="no" checked>
+<label for="repitition-no">no</label>
+

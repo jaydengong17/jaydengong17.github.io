@@ -1,0 +1,33 @@
+---
+layout: post
+title: "Continued Fraction Calculator"
+date: "2023-10-24"
+hide: false
+author: "Jayden Gong"
+excerpt_seperator: <!--excerpt-->
+---
+
+{% include latex.html%}
+
+This is my continued fraction calculator.
+
+{% include continued_fraction.html %}
+
+Try:
+
+$$π$$:
+
+```3,7,15,1,292,1,1,1,2,1,3,1,14,2,1,1,2,2,2,2,1,84,2,1
+,1,15,3,13,1,4,2,6,6,99,1,2,2,6,3,5,1,1,6,8,1,7,1,2,3
+,7,1,2,1,1,1,2,1,1,1,3,1,1,8,1,1,2,1,6,1,1,5,2,2,3,1,
+2,4,4,16,1,161,45,1,22,1,2,2,1,4,1,2,24,1,2,1,3,1,2,1```
+
+$$e$$:
+
+```2,1,2,3,4,5,6,7,8,...```
+
+$$\sqrt{2}$$:
+
+```2,1,1,1,1,1,...```
+
+This is how continued fractions work.
