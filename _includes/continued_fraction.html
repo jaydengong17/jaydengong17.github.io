@@ -14,13 +14,12 @@
 
       table.innerHTML = "";
       for (let number = (repeat ? 0: start.length - 1); number < start.length; number ++) {
-          let currentNumerator = start[start.length - 1];
+          let currentNumerator = start[number];
           let currentDenominator = 1;
           for (let i = number - 1; i >= 0; i--) {
               nextDenominator = currentNumerator;
               currentNumerator = currentDenominator + start[i] * currentNumerator;
               currentDenominator = nextDenominator;
-              console.log(currentDenominator, currentNumerator);
           }
       
           let new_row = table.insertRow(-1);
@@ -43,12 +42,10 @@
   <tbody id="table_body">
   </tbody>
 </table>
-<p>Enter values below as a list seperated by commas (ex. a,b,c,d,e,...)</p>
+<p>Enter values below as a list seperated by commas (ex. 1,4,23,2,5)</p>
 <input type="text" id="list">
 <button onclick="evaluateFraction()"> Go </button>
-<br>
-<b>WARNING: IF YOU ENTER A LARGE NUMBER OF ITEMS AND TURN ON THE OPTION BELOW, YOU WILL NEED TO FORCE QUIT YOUR BROWSER.</b>
-<br>
+<p style="font-size: 75%">It might not work well when dealing with a very long list of numbers.</p>
 Solve for every first N numbers:
 <input type="radio" id="repitition-yes" name="repitition" value="yes">
 <label for="repitition-yes">yes</label>
