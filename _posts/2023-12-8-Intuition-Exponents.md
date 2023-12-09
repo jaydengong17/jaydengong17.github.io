@@ -9,11 +9,9 @@ excerpt_seperator: <!--excerpt-->
 
 {% include latex.html %}
 
-I made this to help people gain intuition for some math.
-Specifically, I noticed that the way that my school math class taught math was the formulas way,
-where we just memorize a lot of formulas without actually knowing how they work.
-Because of that, I decided to do this to explain the reasoning behind
-all of the formulas. This series will go along with what is taught in class right now.
+I want to write this post to help people gain a bit of intuition for some math formulas we are learning at school.
+Specifically, I noticed that my classmates often memorize all the formulas without actually learning why they work.
+I will try to make this series go along with what is taught in class right now.
 
 Formulas we memorized this class:
 
@@ -52,6 +50,8 @@ $$x^{-2} = \frac{1}{x \cdot x} = \frac{1}{x^2}$$
 
 <p style="text-align: center;">and so on.</p>
 
+<br>
+
 Next formula: $$x^a \cdot x^b = x^{a+b}$$
 
 This can be visualized easily if we just expand it:
@@ -71,11 +71,13 @@ Now, we can clearly see that there will be $$a+b$$ $$x$$'s.
 
 When put back in exponent form, it will be $$x^{a+b}$$.
 
+<br>
+
 Using this same example, we can also gain intuition for $$\frac{x^a}{x^b} = x^{a-b}$$.
 
 When we expand it this time, some of the $$x$$'s will now become $$\frac{1}{x}$$'s instead.
 
-$$x^a \cdot x^b =
+$$x^a \cdot x^{-b} =
 \underbrace{x \cdot x \cdot x \cdot
 _{\dots}
 \cdot x \cdot x}_
@@ -106,6 +108,8 @@ of $$\frac{1}{x}$$'s left.
 
 As you can see, this all simplifies down to $$x^{a-b}$$.
 
+<br>
+
 Another way to see this is by manipulating it algebraically.
 
 We can start with $$\frac{x^a}{x^b}$$.
@@ -116,6 +120,8 @@ Because $$x^{-n} = \frac{1}{x^n}$$, it can be simplified to $$x^a \cdot x^{-b}$$
 
 Now, we can just use the multiplication rule to simplify further:
 $$x^a \cdot x^{-b} = x^{a+(-b)} = x^{a-b}$$.
+
+<br>
 
 Final formula: $$(x^a)^b = x^{a \cdot b}$$
 
