@@ -13,7 +13,7 @@ I made this to help people gain intuition for some math.
 Specifically, I noticed that the way that my school math class taught math was the formulas way,
 where we just memorize a lot of formulas without actually knowing how they work.
 Because of that, I decided to do this to explain the reasoning behind
-all of the formulas. This will go along with what I am learning in class right now.
+all of the formulas. This series will go along with what is taught in class right now.
 
 Formulas we memorized this class:
 
