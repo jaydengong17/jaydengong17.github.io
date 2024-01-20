@@ -4,11 +4,14 @@ author: Jayden Gong
 excerpt_separator: <!--excerpt-->
 header_pages:
   - index.md
+  - intuition.md
+  - diary.md
   - ascii.md
   - spirograph.md
-  - diary.md
   - about.md
 collections:
+  intuition:
+    output: true
   diaries:
     output: true
 google_analytics: true
