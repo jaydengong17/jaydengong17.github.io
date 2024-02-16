@@ -5,6 +5,8 @@ date: "2023-12-8"
 hide: false
 author: "Jayden Gong"
 excerpt_seperator: <!--excerpt-->
+redirect_from:
+  - /2023/12/08/Intuition-Exp-Rules.html
 ---
 
 {% include latex.html %}

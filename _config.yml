@@ -15,3 +15,7 @@ collections:
   diaries:
     output: true
 google_analytics: true
+plugins:
+  - jekyll-redirect-from
+whitelist:
+  - jekyll-redirect-from
