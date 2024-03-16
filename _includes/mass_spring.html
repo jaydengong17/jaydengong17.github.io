@@ -1,0 +1,471 @@
+<canvas onmousemove="updateMousePos(event)" onmousedown="mouseChange(event, 1)" onmouseup="mouseChange(event, 0)" id="canvas" width="500" height="500" style="border:1px solid #000000; margin: 10 px"></canvas>
+<script>
+  const canvas = document.getElementById("canvas");
+  const ctx = document.getElementById("canvas").getContext("2d");
+    
+  let Loop = null;
+  
+  let nodes = [];
+  let springs = [];
+  let objects = [];
+  
+  const node_radius = 5;
+  const damping_factor = 0.9;
+  const gravity = 9.8;
+  const delta_time = 0.05;
+  
+  class Node{
+      constructor(x, y){
+          this.x = x;
+          this.y = y;
+          this.original_x = x;
+          this.original_y = y;
+          this.v_x = 0;
+          this.v_y = 0;
+          this.x_accel = 0;
+          this.y_accel = 0;
+      }
+
+      getPos(){
+          return [this.x, this.y];
+      }
+
+      moveTo(coords){
+          this.x = this.original_x + coords.x;
+          this.y = this.original_y + coords.y;
+      }
+
+      addForce(accel){
+          this.x_accel += accel[0];
+          this.y_accel += accel[1];
+      }
+      
+      reset(){
+          this.x = this.original_x;
+          this.y = this.original_y;
+          this.v_x = 0;
+          this.v_y = 0;
+          this.x_accel = 0;
+          this.y_accel = 0;
+          
+          this.show()
+      }
+
+      collision(dist){
+          this.v_x = 0;
+          this.v_y = 0;
+
+          this.x += dist[0];
+          this.y += dist[1];
+      }
+
+      show(){
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, node_radius - 1, 0, 2 * Math.PI);
+          ctx.fillStyle = 'red';
+          ctx.fill();
+          ctx.stroke();
+      }
+
+      set(){
+          this.original_x = this.x
+          this.original_y = this.y
+      }
+      
+      next(){
+          this.v_x += this.x_accel * damping_factor * delta_time;
+          this.v_y += this.y_accel * damping_factor * delta_time;
+          
+          this.x += this.v_x * delta_time;
+          this.y += this.v_y * delta_time;
+
+          this.x_accel *= (Math.max(0, Math.abs(this.x - canvas.width / 2)) /
+                           Math.abs(this.x - canvas.width / 2))
+          this.y_accel *= (Math.max(0, Math.abs(this.y - canvas.height / 2)) /
+                           Math.abs(this.y - canvas.width / 2))
+          
+          this.x = Math.max(5, Math.min(this.x, canvas.width - 5));
+          this.y = Math.max(5, Math.min(this.y, canvas.height - 5));
+
+          this.show();
+
+          this.x_accel = 0;
+          this.y_accel = gravity;
+      }
+  }
+  
+  class Spring{
+      constructor(node1, node2, rest_length, stiffness){
+          this.node1 = node1;
+          this.node2 = node2;
+          this.rest_length = rest_length;
+          this.stiffness = stiffness;
+      }
+      
+      next(){
+          let pos_1 = nodes[this.node1].getPos();
+          let pos_2 = nodes[this.node2].getPos();
+          
+          ctx.beginPath();
+          ctx.moveTo(pos_1[0], pos_1[1]);
+          ctx.lineTo(pos_2[0], pos_2[1]);
+          ctx.stroke();
+      }
+
+      accelNodes(){
+          let pos_1 = nodes[this.node1].getPos();
+          let pos_2 = nodes[this.node2].getPos();
+          let displacement = [pos_1[0] - pos_2[0], pos_1[1] - pos_2[1]];
+          let distance = Math.sqrt(displacement[0] ** 2 + displacement[1] ** 2);
+          let force = (distance - this.rest_length) * this.stiffness;
+          nodes[this.node1].addForce(displacement.map(x => x * -force/distance));
+          nodes[this.node2].addForce(displacement.map(x => x * force/distance));
+      }
+  }
+
+  class Body{
+      constructor(node_pos){
+          this.x = 0;
+          this.y = 0;
+          this.node_pos = node_pos;
+          this.body_nodes = [];
+          this.x_bounds = [0,0];
+          this.y_bounds = [0,0];
+
+          for (let n = 0; n < node_pos.length; n++){
+              let positions = node_pos[n];
+              //console.log(this.x_bounds, this.y_bounds, positions);
+              this.body_nodes.push(new Node(...positions));
+              nodes.push(this.body_nodes[this.body_nodes.length - 1])
+
+              this.x_bounds = [Math.min(this.x_bounds[0], positions[0]),
+                               Math.max(this.x_bounds[1], positions[0])];
+              this.y_bounds = [Math.min(this.y_bounds[0], positions[1]),
+                               Math.max(this.y_bounds[1], positions[1])];
+          }
+      }
+
+      getBounds(){
+          return {x: this.x_bounds, y: this.y_bounds};
+      }
+      
+      move(coords){
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          this.body_nodes.forEach(obj => obj.moveTo(coords));
+          springs.forEach(obj => obj.next());
+          nodes.forEach(obj => obj.show());
+      }
+
+      set(){
+          this.body_nodes.forEach(obj => obj.set());
+      }
+  }
+  
+  function update(){
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      springs.forEach(obj => obj.accelNodes());
+
+      nodes.forEach(obj => obj.next());
+      for(let node1 = 0; node1 < nodes.length; node1 ++){
+          for(let node2 = node1 + 1; node2 < nodes.length; node2 ++){
+              let pos_1 = nodes[node1].getPos();
+              let pos_2 = nodes[node2].getPos();
+              let displacement = [pos_1[0] - pos_2[0], pos_1[1] - pos_2[1]];
+              let distance = Math.sqrt(displacement[0] ** 2 + displacement[1] ** 2);
+
+              // if colliding, go away
+              if (distance < (2 * node_radius)){
+                  nodes[node1].collision(
+                      displacement.map(x => x * (2 * node_radius - distance)/distance));
+                  nodes[node2].collision(
+                      displacement.map(x => x * (distance - 2 * node_radius)/distance));
+              }
+          }
+      }
+      
+      springs.forEach(obj => obj.next());
+      nodes.forEach(obj => obj.show());
+  }
+
+  // for starting and stopping the simulation
+  function startPressed() {
+      if (Loop != null){
+          clearInterval(Loop)
+          Loop = null
+          document.getElementById("startButton").innerHTML = "Start";
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          nodes.forEach(obj => obj.reset());
+          springs.forEach(obj => obj.next());
+          nodes.forEach(obj => obj.show());
+      } else {
+          Loop = setInterval(update, 1000 * delta_time);
+          document.getElementById("startButton").innerHTML = "Stop";
+      }
+  }
+
+  function clearPressed(){
+      while (nodes.length > 0) nodes.pop();
+      while (springs.length > 0) springs.pop();
+      while (objects.length > 0) objects.pop();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (Loop != null){
+          startPressed();
+      }
+  }
+
+
+  // GENERATION STUFF
+  
+
+  // for generating n-gon positions
+  function generatePolygon(num_layers, sides){
+      let node_positions = [];
+      node_positions.push([[0,0]]);
+      for(let layer = 1; layer < num_layers; layer ++){
+          layer_list = [];
+          for(let spoke = 0; spoke < sides; spoke ++){
+              let last_spoke = [Math.cos(spoke / sides * 2 * Math.PI) * layer,
+                                Math.sin(spoke / sides * 2 * Math.PI) * layer];
+              let next_spoke = [Math.cos((spoke + 1) / sides * 2 * Math.PI) * layer,
+                                Math.sin((spoke + 1) / sides * 2 * Math.PI) * layer];
+
+              layer_list.push(last_spoke);
+              for(let inbetween = 0; inbetween < layer - 1; inbetween ++){
+                  averaged_x = (last_spoke[0] *
+                                (1 - ((inbetween + 1) / layer)) +
+                                next_spoke[0] *
+                                (inbetween + 1) / layer);
+                  
+                  averaged_y = (last_spoke[1] * 
+                                (1 - ((inbetween + 1) / layer)) +
+                                next_spoke[1] *
+                                (inbetween + 1) / layer);
+                  layer_list.push([averaged_x, averaged_y]);
+              }
+              
+          }
+          node_positions.push(layer_list);
+      }
+      return node_positions
+  }
+
+  // for physically making n-gons
+  function fillPolygon(layers, sides, layer_seperation, stiffness){
+      if (layers === false || sides === false){
+          layers = document.getElementById("radius").value;
+          sides = document.getElementById("sides").value;
+      }
+      
+      let last_layer_index = nodes.length;
+      let this_layer_index = nodes.length + 1;
+      let new_body_nodes = [];
+      
+      new_body_nodes.push([0,0]);
+      let positions = generatePolygon(layers, sides);
+      // creating the nodes
+      for(let layer = 1; layer < layers; layer ++){
+          for(let layer_index = 0; layer_index < layer * sides; layer_index ++){
+              new_body_nodes.push([positions[layer][layer_index][0]
+                                   * layer_seperation,
+                                   positions[layer][layer_index][1]
+                                   * layer_seperation]);
+          }
+      }
+      // creating the springs
+      for(let layer = 1; layer < layers; layer ++){
+          let side_spring_length = 2 * Math.sin(Math.PI / sides);
+          for(let layer_node = 0; layer_node < layer * sides; layer_node ++){
+              // creating the springs in each layer
+              springs.push(new Spring(layer_node + this_layer_index,
+                                      this_layer_index + (layer_node + 1)
+                                      % (layer * sides),
+                                      side_spring_length * layer_seperation,
+                                      stiffness));
+
+              // creating the springs between layers
+              let last_layer_spring = layer_node * (layer - 1) / layer;
+              if(last_layer_spring % 1 == 0){
+                  // creating the springs on the 'spokes'
+                  springs.push(new Spring(layer_node + this_layer_index,
+                                          last_layer_index +
+                                          last_layer_spring,
+                                          layer_seperation,
+                                          stiffness));
+              } else {
+                  // creating all the other springs
+                  springs.push(new Spring(layer_node + this_layer_index,
+                                          last_layer_index +
+                                          Math.ceil(last_layer_spring)
+                                          % ((layer - 1) * sides),
+                                          layer_seperation,
+                                          stiffness));
+                  springs.push(new Spring(layer_node + this_layer_index,
+                                          last_layer_index +
+                                          Math.floor(last_layer_spring),
+                                          layer_seperation,
+                                          stiffness));
+              }
+          }
+          last_layer_index += sides * (layer == 1 ? 1 / sides : (layer - 1));
+          this_layer_index += sides * layer;
+      }
+
+      // create new object                                                                                        
+      return new_body_nodes;
+  }
+
+  
+  // for making boxes
+  function makeBox(box_width, box_height, unit_width, stiffness){
+      if (box_width === false || box_height === false){
+          box_width = document.getElementById("x-size").value;
+          box_height = document.getElementById("y-size").value;
+      }
+
+      index = nodes.length;
+      stiffness = 100;
+      let new_body_nodes = [];
+      for(let row = 0; row < box_height; row++){
+          for(let col = 0; col < box_width; col++){
+              new_body_nodes.push([unit_width * col -
+                                   unit_width / 2 * (box_width - 1),
+                                   row * unit_width + 5 -
+                                   unit_width / 2 * (box_height - 1)]);
+              if(row != 0){
+                  springs.push(new Spring(index,
+                                          index - box_width,
+                                          unit_width,
+                                          stiffness));
+                  if(col != 0){
+                      springs.push(new Spring(index,
+                                              index - box_width - 1,
+                                              unit_width * Math.sqrt(2),
+                                              stiffness));
+                      springs.push(new Spring(index - 1,
+                                              index - box_width,
+                                              unit_width * Math.sqrt(2),
+                                              stiffness));
+                  }
+              }
+              if(col != 0){
+                  springs.push(new Spring(index,
+                                          index - 1,
+                                          unit_width,
+                                          stiffness));
+              }
+              
+              index++;
+          }
+      }
+      
+      // create new object
+      return new_body_nodes;
+  }
+
+
+  // UI STUFF
+
+  
+  let mousePos = {x:0, y:0};
+  let waitingInterval = null;
+  let settingInterval = null;
+  
+  function updateMousePos(event){
+      // has to be done every time so that scrolling doesn't affect it
+      let rect = canvas.getBoundingClientRect();
+      
+      mousePos.x = event.clientX - rect.left;
+      mousePos.y = event.clientY - rect.top;
+  }
+
+  // only works inside element
+  let ismouseDown = false;
+  function mouseChange(e, down){
+      ismouseDown = (down !== 0);
+  }
+
+  function addObject(a, b, width, stiffness, type){
+      let curr_object = null;
+      switch (type) {
+      case 'box':
+          curr_object = new Body(makeBox(a, b, width, stiffness));
+          break;
+      case 'polygon':
+          curr_object = new Body(fillPolygon(a, b, width, stiffness));
+          break;
+      default:
+          console.log(type);
+          break;
+      }
+      objects.push(curr_object);
+      waitingInterval = setInterval(
+          () => waitUntilUp(curr_object), 10
+      );
+  }
+
+  function setObject(body){
+      let bounds = body.getBounds();
+      let rectifiedMousePos = {...mousePos}
+      
+      // making sure the object doesn't go over the sides
+      
+      // two different times for readability
+      rectifiedMousePos.x = (Math.max
+                             (0,rectifiedMousePos.x + bounds.x[0])
+                             - bounds.x[0]);
+      rectifiedMousePos.x = (Math.min
+                             (canvas.width, rectifiedMousePos.x + bounds.x[1])
+                             - bounds.x[1]);
+      
+      rectifiedMousePos.y = (Math.max
+                             (0, rectifiedMousePos.y + bounds.y[0])
+                             - bounds.y[0]);
+      rectifiedMousePos.y = (Math.min
+                             (canvas.height, rectifiedMousePos.y + bounds.y[1])
+                             - bounds.y[1]);
+      
+      // body.move({x: 250, y: 250});
+      body.move(rectifiedMousePos);
+
+      if (ismouseDown){
+          clearInterval(settingInterval);
+          settingInterval = null;
+          body.set();
+      }
+  }
+
+  function waitUntilUp(param){
+      if (!ismouseDown) {
+          clearInterval(waitingInterval);
+          waitingInterval = null;
+
+          settingInterval = setInterval(() => setObject(param), 1000 * delta_time);
+      }
+  }
+</script>
+<button type="button" onclick="startPressed()" id="startButton">Start</button>
+
+<button type="button" onclick="clearPressed()" id="startButton">Clear All</button>
+
+Make Box:
+
+Box Width
+<input type="text" id="x-size" value="10">
+
+Box Height
+<input type="text" id="y-size" value="10">
+
+<button type="button" onclick="addObject(false, false, 12, 100, 'box')" id="makeBox">Create Box</button>
+
+
+Make Polygon:
+
+Sides
+<input type="text" id="sides" value="6">
+
+Layers
+<input type="text" id="radius" value="3">
+
+<button type="button" onclick="addObject(false, false, 20, 100, 'polygon')" id="makePolygon">Create Polygon</button>
