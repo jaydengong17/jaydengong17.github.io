@@ -253,9 +253,11 @@
 
   // for physically making n-gons
   function fillPolygon(layers, sides, layer_seperation, stiffness){
-      if (layers === false || sides === false){
+      if (layers === false){
           layers = document.getElementById("radius").value;
           sides = document.getElementById("sides").value;
+          layer_seperation = document.getElementById("seperation").value;
+          stiffness = document.getElementById("stiffness").value;
       }
       
       let last_layer_index = nodes.length;
@@ -319,9 +321,11 @@
   
   // for making boxes
   function makeBox(box_width, box_height, unit_width, stiffness){
-      if (box_width === false || box_height === false){
+      if (box_width === false){
           box_width = document.getElementById("x-size").value;
           box_height = document.getElementById("y-size").value;
+          unit_width = document.getElementById("seperation").value;
+          stiffness = document.getElementById("stiffness").value;
       }
 
       index = nodes.length;
@@ -426,7 +430,6 @@
                              (canvas.height, rectifiedMousePos.y + bounds.y[1])
                              - bounds.y[1]);
       
-      // body.move({x: 250, y: 250});
       body.move(rectifiedMousePos);
 
       if (ismouseDown){
@@ -449,6 +452,17 @@
 
 <button type="button" onclick="clearPressed()" id="startButton">Clear All</button>
 
+To make an object, click the "make" button.
+Then, hover over the place you want to set the position
+of the object, and then click.
+
+Spring Stiffness
+<input type="text" id="stiffness" value="100">
+
+Separation Between Nodes
+<input type="text" id="seperation" value="20">
+
+
 Make Box:
 
 Box Width
@@ -457,7 +471,7 @@ Box Width
 Box Height
 <input type="text" id="y-size" value="10">
 
-<button type="button" onclick="addObject(false, false, 12, 100, 'box')" id="makeBox">Create Box</button>
+<button type="button" onclick="addObject(false, false, false, false, 'box')" id="makeBox">Create Box</button>
 
 
 Make Polygon:
@@ -468,4 +482,4 @@ Sides
 Layers
 <input type="text" id="radius" value="3">
 
-<button type="button" onclick="addObject(false, false, 20, 100, 'polygon')" id="makePolygon">Create Polygon</button>
+<button type="button" onclick="addObject(false, false, false, false, 'polygon')" id="makePolygon">Create Polygon</button>
