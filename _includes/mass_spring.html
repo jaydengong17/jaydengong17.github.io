@@ -10,9 +10,9 @@
   let objects = [];
   
   const node_radius = 5;
-  const damping_factor = 0.9;
-  const gravity = 9.8;
-  const delta_time = 0.05;
+  const damping_factor = 0.99;
+  const gravity = 10;
+  const delta_time = 0.01;
   
   class Node{
       constructor(x, y){
@@ -134,7 +134,6 @@
 
           for (let n = 0; n < node_pos.length; n++){
               let positions = node_pos[n];
-              //console.log(this.x_bounds, this.y_bounds, positions);
               this.body_nodes.push(new Node(...positions));
               nodes.push(this.body_nodes[this.body_nodes.length - 1])
 
@@ -329,7 +328,6 @@
       }
 
       index = nodes.length;
-      stiffness = 100;
       let new_body_nodes = [];
       for(let row = 0; row < box_height; row++){
           for(let col = 0; col < box_width; col++){
