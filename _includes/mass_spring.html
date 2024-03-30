@@ -79,13 +79,8 @@
           this.x += this.v_x * delta_time;
           this.y += this.v_y * delta_time;
 
-          this.x_accel *= (Math.max(0, Math.abs(this.x - canvas.width / 2)) /
-                           Math.abs(this.x - canvas.width / 2))
-          this.y_accel *= (Math.max(0, Math.abs(this.y - canvas.height / 2)) /
-                           Math.abs(this.y - canvas.width / 2))
-          
-          this.x = Math.max(5, Math.min(this.x, canvas.width - 5));
-          this.y = Math.max(5, Math.min(this.y, canvas.height - 5));
+          this.x = Math.max(node_radius, Math.min(this.x, canvas.width - node_radius));
+          this.y = Math.max(node_radius, Math.min(this.y, canvas.height - node_radius));
 
           this.show();
 
@@ -402,9 +397,8 @@
           break;
       }
       objects.push(curr_object);
-      waitingInterval = setInterval(
-          () => waitUntilUp(curr_object), 10
-      );
+
+      settingInterval = setInterval(() => setObject(param), 1000 * delta_time);
   }
 
   function setObject(body){
@@ -412,8 +406,6 @@
       let rectifiedMousePos = {...mousePos}
       
       // making sure the object doesn't go over the sides
-      
-      // two different times for readability
       rectifiedMousePos.x = (Math.max
                              (0,rectifiedMousePos.x + bounds.x[0])
                              - bounds.x[0]);
@@ -434,15 +426,6 @@
           clearInterval(settingInterval);
           settingInterval = null;
           body.set();
-      }
-  }
-
-  function waitUntilUp(param){
-      if (!ismouseDown) {
-          clearInterval(waitingInterval);
-          waitingInterval = null;
-
-          settingInterval = setInterval(() => setObject(param), 1000 * delta_time);
       }
   }
 </script>

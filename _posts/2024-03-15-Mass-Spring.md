@@ -26,4 +26,4 @@ and $$s$$ is spring stiffness.
 
 This simulation is quite fun to play with.
 For more ideas to use this and more explanation,
-go here: [Mass-Spring Model](https://www.youtube.com/watch?v=e3LkIRP-ytk)
+go here: [Mass-Spring Model Video](https://www.youtube.com/watch?v=e3LkIRP-ytk)
