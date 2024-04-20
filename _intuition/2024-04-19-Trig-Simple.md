@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Intuition - Exponent Rules"
+title: "Intuition - Trig Functions"
 date: "2024-04-19"
 hide: false
 author: "Jayden Gong"
