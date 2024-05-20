@@ -13,6 +13,8 @@ Recently, I was thinking about finding a prime-finding algorithm.
 This eventually led to me basically rediscovering
 the Sieve of Eratosthenes algorithm.
 
+<!--excerpt-->
+
 ### The Start
 
 I was thinking about the sorting algorithm, "sleep sort".
