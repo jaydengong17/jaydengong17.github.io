@@ -1,0 +1,197 @@
+<script>
+    function checkNaN(input){
+        if (typeof(input) == "object") {
+            input.forEach((x)=>checkNaN(x));
+            // getting here means no NaNs anywhere
+            return input
+        } else if (isNaN(input)){
+            document.getElementById("quotient_display").innerHTML = 
+            "The input was not formatted correctly. Please only use numbers, 'x', and spaces.";
+            throw new Error("input formatted incorrectly");
+        } else {
+            return input;
+        }
+    }
+
+    function parseInputs(input_name){
+        const input_text = document.getElementById(input_name).value.toLowerCase();
+        if (input_text == ""){
+            document.getElementById("quotient_display").innerHTML = "Please enter an input.";
+            throw new Error("input was empty");
+        }
+
+        let input_to_sort = splitTerms(input_text);
+
+        if (input_to_sort.some((word)=>word.length = 0)){
+            document.getElementById("quotient_display").innerHTML =
+            "Your input has a duplicate sign somewhere.";
+            throw new Error("term was empty")
+        }
+
+        // split terms into coefficient and degree pair
+        input_to_sort = input_to_sort.map(termToCoefficientDegree)
+
+        input_to_sort.sort(function(a, b) {return b[1] - a[1];});
+        const degree = input_to_sort[0][1]
+
+        // make a list to store all coefficients. length is highest degree + 1.
+        let input_sorted = new Array(degree + 1).fill(0);
+
+        input_to_sort.forEach((sorted_term) => 
+            input_sorted[degree - sorted_term[1]] += sorted_term[0]);
+    
+        //terms could cancel, so we delete 0s:
+        while (input_sorted[0] == 0) {
+            input_sorted = input_sorted.slice(1);
+        }
+
+        return input_sorted;
+    }
+
+    function splitTerms(whole_input){
+        // remove all spaces and then split by plusses
+        const input_plus_split = whole_input.replace(/ /g,'').split("+");
+        // if negative sign, split, but also add a negative sign in front of the entry.
+        let input_split = [];
+        for (let split_index = 0; split_index < input_plus_split.length; split_index++){
+            let chunk_split = input_plus_split[split_index].split("-");
+
+            // attach a negative to everything that was split except for the start
+            for (let attach_neg = 1; attach_neg < chunk_split.length; attach_neg++){
+                chunk_split[attach_neg] = "-".concat(chunk_split[attach_neg]);
+            }
+
+            input_split.push(...chunk_split);
+        }
+        return input_split;
+    }
+
+    function termToCoefficientDegree(term){
+        if (term.includes("x")){
+            term = term.split("x");
+
+            // handle implied 1s/-1s
+            if (term[0] == ""){
+                term[0] = 1;
+            } else if (term[0] == "-") {
+                term[0] = -1;
+            }
+
+            // return coefficient, degree
+            if (term[1].includes("^")){
+                // coefficient is after "^"
+                return [checkNaN(Number(term[0])), checkNaN(Number(term[1].replace('^','')))];
+            } else {
+                return [checkNaN(Number(term[0])), 1];
+            }
+        } else {
+            // this must be the constant term.
+            return [checkNaN(Number(term)), 0];
+        }
+    }
+
+    function termToString(number_term, degree, index){
+        if (number_term == 0){
+            return "";
+        } else {
+            let string_term = ""
+            // puts operations (+, -) at front of term
+            if (number_term > 0){
+                if (index != 0){
+                    string_term = " + ";
+                }
+            } else {
+                string_term = " - ";
+            }
+            // simplifies all cases
+            number_term = Math.abs(number_term);
+            
+            // equivalent to if number_term == 1, do nothing (implied 1).
+            // if it's the constant term, then we need the 1.
+            if (number_term != 1 && degree != 0){
+                string_term = string_term.concat(String(number_term));
+            }
+
+            if (degree == 0){
+                return string_term.concat(String(number_term));
+            } else if (degree == 1){
+                return string_term.concat("x");
+            } else {
+                return string_term.concat("x^", degree);
+            }
+        }
+    }
+
+    function evaluateQuotient(){
+        let remaining_dividend = parseInputs("dividend_input");
+        const divisor = parseInputs("divisor_input");
+
+        let quotient = new Array(remaining_dividend.length - divisor.length + 1).fill(0);
+        for (quotient_term = 0; quotient_term < quotient.length; quotient_term++) {
+            checkNaN(quotient);
+            checkNaN(remaining_dividend);
+            checkNaN(divisor);
+            if (remaining_dividend[0] == 0){
+                // if 0 is at front, remove, and go to next iteration (does this to keep in sync)
+                remaining_dividend = remaining_dividend.slice(1);
+            } else {
+                // to cancel out the remaining dividend's highest degree term
+                quotient[quotient_term] = remaining_dividend[0] / divisor[0];
+
+                current_divisor = divisor.map((x) => x * quotient[quotient_term]);
+                // adding 0s to the end so that it matches with the dividend
+                current_divisor.push(...new Array(quotient.length - quotient_term - 1).fill(0));
+                checkNaN(current_divisor);
+
+                remaining_dividend = remaining_dividend.map((v, i) => v - current_divisor[i]);
+                // delete leading 0
+                remaining_dividend = remaining_dividend.slice(1);
+            }
+        }
+
+        return [checkNaN(quotient), checkNaN(remaining_dividend)];
+    }
+    
+    function showQuotient(){
+        result = evaluateQuotient();
+        final_quotient = result[0];
+        final_remainder = result[1];
+
+        // remove all starting 0s
+        while (final_remainder[0] == 0) {
+            final_remainder = final_remainder.slice(1);
+        }
+
+        quotient_string = "Quotient: ";
+        remainder_string = "<br>Remainder: ";
+
+        quotient_degree = final_quotient.length - 1;
+        // add each term to end of quotient
+        for (const [i, element] of final_quotient.entries()) {
+            quotient_string = quotient_string.concat(
+                termToString(element, quotient_degree - i, i));
+        }
+
+        // repeat for remainder
+        remainder_degree = final_remainder.length - 1;
+        if (remainder_degree == -1){
+            remainder_string = " no remainder"
+        } else {
+            for (const [i, element] of final_remainder.entries()) {
+                remainder_string = remainder_string.concat(
+                    termToString(element, remainder_degree - i, i));
+            }
+        }
+
+        console.log(quotient_string, remainder_string)
+
+        document.getElementById("quotient_display").innerHTML = 
+            quotient_string.concat(remainder_string);
+    }
+</script>
+
+<input type="text" id="dividend_input" style="font-size: 20px;">
+<br>
+<input type="text" id="divisor_input" style="font-size: 20px;">
+<p id="quotient_display" style="font-size: 20px;"></p>
+<button onclick="showQuotient()"> Go </button>
