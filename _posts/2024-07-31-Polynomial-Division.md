@@ -7,10 +7,15 @@ author: "Jayden Gong"
 excerpt_seperator: <!--excerpt-->
 ---
 
+The front page is getting overwhelmed with all of the code,
+so to view the calculator,
+you have to click more.
+
+<!--excerpt-->
+
 {%include polynomial_division.html%}
 {%include latex.html%}
 
-<!--excerpt-->
 <br>
 This is my polynomial division calculator.
 Please only use spaces, "x"s, "^", and numbers.

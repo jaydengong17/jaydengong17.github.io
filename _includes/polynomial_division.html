@@ -1,5 +1,6 @@
 <script>
-    function checkNaN(input){
+
+    function checkNaN(input) {
         if (typeof(input) == "object") {
             input.forEach((x)=>checkNaN(x));
             // getting here means no NaNs anywhere
@@ -13,7 +14,7 @@
         }
     }
 
-    function parseInputs(input_name){
+    function parseInputs(input_name) {
         const input_text = document.getElementById(input_name).value.toLowerCase();
         if (input_text == ""){
             document.getElementById("quotient_display").innerHTML = "Please enter an input.";
@@ -48,7 +49,7 @@
         return input_sorted;
     }
 
-    function splitTerms(whole_input){
+    function splitTerms(whole_input) {
         // remove all spaces and then split by plusses
         const input_plus_split = whole_input.replace(/ /g,'').split("+");
         // if negative sign, split, but also add a negative sign in front of the entry.
@@ -66,7 +67,7 @@
         return input_split;
     }
 
-    function termToCoefficientDegree(term){
+    function termToCoefficientDegree(term) {
         if (term.includes("x")){
             term = term.split("x");
 
@@ -90,7 +91,7 @@
         }
     }
 
-    function termToString(number_term, degree, index){
+    function termToString(number_term, degree, index) {
         if (number_term == 0){
             return "";
         } else {
@@ -122,7 +123,7 @@
         }
     }
 
-    function evaluateQuotient(){
+    function evaluateQuotient() {
         let remaining_dividend = parseInputs("dividend_input");
         const divisor = parseInputs("divisor_input");
 
@@ -151,8 +152,8 @@
 
         return [checkNaN(quotient), checkNaN(remaining_dividend)];
     }
-    
-    function showQuotient(){
+
+    function showQuotient() {
         result = evaluateQuotient();
         final_quotient = result[0];
         final_remainder = result[1];
