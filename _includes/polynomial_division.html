@@ -163,7 +163,7 @@
         }
 
         quotient_string = "Quotient: ";
-        remainder_string = "<br>Remainder: ";
+        remainder_string = "Remainder: ";
 
         quotient_degree = final_quotient.length - 1;
         // add each term to end of quotient
@@ -175,7 +175,7 @@
         // repeat for remainder
         remainder_degree = final_remainder.length - 1;
         if (remainder_degree == -1){
-            remainder_string = " no remainder"
+            remainder_string = "No remainder"
         } else {
             for (const [i, element] of final_remainder.entries()) {
                 remainder_string = remainder_string.concat(
@@ -183,15 +183,50 @@
             }
         }
 
-        console.log(quotient_string, remainder_string)
+        // if the quotient is empty, make the quotient 0.
+        if (quotient_string == "Quotient: "){
+            quotient_string = "Quotient: 0"
+        }
 
-        document.getElementById("quotient_display").innerHTML = 
-            quotient_string.concat(remainder_string);
+        if (document.querySelector('input[name="repitition"]:checked').value == "yes"){
+            document.getElementById("quotient_display").innerHTML = 
+                quotient_string.concat("<br>", remainder_string);
+        } else {
+            document.getElementById("quotient_display").innerHTML = remainder_string;
+        }
     }
 </script>
 
-<input type="text" id="dividend_input" style="font-size: 20px;">
-<br>
-<input type="text" id="divisor_input" style="font-size: 20px;">
-<p id="quotient_display" style="font-size: 20px;"></p>
-<button onclick="showQuotient()"> Go </button>
+<style>
+    input.idkCSS {
+        line-height: 0.2;
+        border-style: none;
+        background-color: #fdfdfd;
+        width:500px;
+        text-align: center;
+        outline: none;
+        font-size: 20px;
+    }
+    button.HowdoImakedefault {
+        border: 4px solid #ededed;
+        border-radius: 100000000px;
+        background-color: #ededed;
+        font-size: 20px;
+    }
+</style>
+
+<div style="font-size: 20px;">
+    <input type="text" id="dividend_input" class = "idkCSS" placeholder = "Dividend">
+    <input type="text" id="divisor_input" class = "idkCSS" style="border-top: solid black 2px;" placeholder = "Divisor">
+
+    <p id="quotient_display" style="font-size: 20px;"></p>
+
+    Show quotient?
+    <input type="radio" id="repitition-yes" name="repitition" value="yes" style="font-size: 20px;" checked>
+    <label for="repitition-yes">yes</label>
+    <input type="radio" id="repitition-no" name="repitition" value="no" style="font-size: 20px;">
+    <label for="repitition-no">no</label>
+    <br>
+
+    <button onclick="showQuotient()" class = "HowdoImakedefault"> Calculate </button>
+</div>
