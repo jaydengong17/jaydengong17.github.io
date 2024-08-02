@@ -136,7 +136,7 @@ If you have $$n > 10$$, you can use the alphabet as digits.
 But say you want some way to convert bases
 quickly into other bases.
 
-First, notice that the digit to the imediate right
+First, notice that the digit to the immediate left
 of the decimal is always the ones digit.
 
 Next, notice that when we carry to the next place value,
