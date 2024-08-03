@@ -6,45 +6,76 @@
   let r1 = null;
   let r1_angle = 0;
   let r2 = null;
-  let r2_angel = 0;
+  let r2_angle = Math.PI;
   let speed = null;
   let interval = null;
-  let prev_x = 400 - r1 + r2;
-  let prev_y = 200;
+  let prev_x = 0;
+  let prev_y = 0;
+  let turn_percent = 100
+  let shrink = null
+  let total_steps = null
   
   function init() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      prev_x = 400 - r1 + r2;
-      prev_y = 200
-      r1 = document.getElementById("r1").value;
-      r2 = document.getElementById("r2").value;
-      speed = document.getElementById("speed").value;
+    r1 = Number(document.getElementById("r1").value);
+    r2 = Number(document.getElementById("r2").value);
+    speed = Number(document.getElementById("speed").value);
+    shrink = 100 - Number(document.getElementById("shrink").value) / 100;
+    total_steps = Number(document.getElementById("rotate").value);
+    total_steps *= lcm(r2, turn_percent);
+    console.log(total_steps);
 
-      draw(0);
+    prev_x = 200 + r1 - 2 * r2;
+    prev_y = 200;
+
+    // r1 is really r1 - r2 because r2 cancels some of r1 out.
+    r1 -= r2;
+
+    draw(0, 1);
   }
 
-  function draw(t) {
-      r1_angle = t * Math.PI / 30
-      // provides smooth turning as seen in physical spirographs
-      r2_angle =  - r2 / r1 * r1_angle;
+  let lcm = (n1, n2) => {
+    let lar = Math.max(n1, n2);
+    let small = Math.min(n1, n2);
+  
+    let i = lar;
+    while(i % small !== 0){
+      i += lar;
+    }
 
-      // draw line
-      ctx.beginPath();
-      ctx.moveTo(prev_x, prev_y);
-      prev_x = 200 + Math.cos(r1_angle) * (200 - r1) + Math.cos(r2_angle) * r2;
-      prev_y = 200 + Math.sin(r1_angle) * (200 - r1) + Math.sin(r2_angle) * r2;
-      ctx.lineTo(prev_x, prev_y);
-      ctx.stroke();
+    return i;
+  }
+
+  function draw(t, shrink_percent) {
+    r1_angle = t * 2 * Math.PI / turn_percent
+    // provides smooth turning as seen in physical spirographs
+    if (r2 == 0) {
+      r2_angle = 0
+    } else {
+      r2_angle = r1 / r2 * -r1_angle + Math.PI;
+    }
+
+    // draw line
+    ctx.beginPath();
+    ctx.moveTo(prev_x, prev_y);
+
+    prev_x = 200 + shrink_percent * (Math.cos(r1_angle) * r1 + Math.cos(r2_angle) * r2);
+    prev_y = 200 + shrink_percent * (Math.sin(r1_angle) * r1 + Math.sin(r2_angle) * r2);
       
-      if (t < 3000) {
-          setTimeout(draw, 100 - speed, t + 1);
-      }
+    ctx.lineTo(prev_x, prev_y);
+    ctx.stroke();
+      
+    if (t <= total_steps) {
+        setTimeout(draw, 100 - speed, t + 1, shrink_percent * shrink / 100);
+    }
   }
 </script>
 <p>If you want your simulation to be physically accurate,
-  you should make Radius 1 between 1 and 200 (inclusive),
-  with Radius 2 between 0 and Radius 1.
+  you should make Radius 1 between 1 and 100 (inclusive),
+  with Radius 2 between 1 and Radius 1.
+  If you input a 0 into either radius,
+  your computer will start intensely lagging.
   <br>
   Radius 1:</p>
 <input type="text" id="r1">
@@ -52,5 +83,9 @@
 <input type="text" id="r2">
 <p>Speed of drawing (between 0 and 100)</p>
 <input type="text" id="speed">
+<p>Rate of shrinking (between 0 to 100)</p>
+<input type="text" id="shrink">
+<p>Rotation number (how many times to completely rotate around)</p>
+<input type="text" id="rotate">
 
 <button type="button" onclick="init()" id="start"> Draw </button>
