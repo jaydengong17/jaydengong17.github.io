@@ -1,0 +1,145 @@
+<canvas id="canvas" width="500" height="500" style="border:1px solid #000000; margin: 10 px"></canvas>
+<script>
+    const canvas = document.getElementById("canvas");
+    const ctx = document.getElementById("canvas").getContext("2d");
+    const width = canvas.width
+    const height = canvas.height
+
+    let levels = 5
+
+    // create 2d array of points
+    let points = []
+    for(let i = 0; i < width; i++) {
+        temp = []
+        for(let j = 0; j < height; j++) {
+            temp.push([i, j])
+        }
+        points.push(temp)
+    }
+
+    roots = [[0, 500], [500, 0], [0, 0]]
+
+    function expand_polynomial(expand_roots){
+        // start with constant coefficient
+        let coefficients = [[1, 0]]
+        for (root_index = 0; root_index < expand_roots.length; root_index ++){
+            // start with multiplying by the x part. don't mutate original array.
+            let new_coefficients = [[0, 0]].concat(coefficients)
+
+            // for each coefficient, multiply by the root and then add that to the new_coefficients
+            for (coefficient_index = 0; coefficient_index < coefficients.length; coefficient_index++){
+                // make the root negative so that you multiply by x - r, not x + r
+                coefficient = multiply(coefficients[coefficient_index], multiply([-1, 0], expand_roots[root_index]))
+                new_coefficients[coefficient_index] = add(coefficient, new_coefficients[coefficient_index])
+            }
+
+            coefficients = new_coefficients
+        }
+        console.log(coefficients)
+        return coefficients
+    }
+
+    function derivative_polynomial(coefficients){
+        let derivative_coefficients = Array(coefficients.length - 1)
+        // start from 1 to ignore constant term
+        for (derivative_index = 1; derivative_index < coefficients.length; derivative_index++){
+            // then chain rule it, so multiply the power to the coefficient
+            derivative_coefficients[derivative_index - 1] = multiply([derivative_index, 0], coefficients[derivative_index])
+        }
+        console.log(derivative_coefficients)
+        return derivative_coefficients
+    }
+
+    function evaluate_polynomial(coefficients, variable){
+        val = [0, 0]
+        // for each coefficient, raise the variable to that power and then multiply by the coefficient
+        for (power = 0; power < coefficients.length; power++){
+            b = multiply(coefficients[power], exponentiate(variable, power))
+            val = add(val, b)
+        }
+        return val
+    }
+
+    function add(a, b){
+        return [a[0] + b[0], a[1] + b[1]]
+    }
+
+    function multiply(a, b){
+        // multiples a by b, where they are complex numbers.
+        return [a[0] * b[0] - a[1] * b[1], a[0] * b[1] + a[1] * b[0]]
+    }
+
+    function divide(a, b){
+        // divides a by b, wher they are complex numbers.
+        return [(a[0] * b[0] + a[1] * b[1]) / (b[0] ** 2 + b[1] ** 2), (a[1] * b[0] - a[0] * b[1]) / (b[0] ** 2 + b[1] ** 2)]
+    }
+
+    function exponentiate(a, b){
+        // returns a ** b
+        result = [1, 0]
+        for (let i = 0; i < b; i ++){
+            result = multiply(result, a)
+        }
+        return result
+    }
+
+    function distance(a, b, c, d){
+        // returns distance from a + bi to c + di
+        return Math.sqrt((a - c) ** 2 + (b - d) ** 2)
+    }
+
+    function draw(x, y, id){
+        ctx.fillStyle = color(id, roots.length)
+        ctx.fillRect(x,y,1,1);
+    }
+
+    function color(id, total){
+        return "hsl(" + id / total * 360 + ", 80%, 60%)"
+    }
+    
+    function approximate_once(row, col, original, derivative){
+        // should return x_0 - f(x)/f'(x)
+        orig_point = points[col][row]
+        f_x = evaluate_polynomial(original, orig_point)
+        f_prime_x = evaluate_polynomial(derivative, orig_point)
+        // set the new point to the difference of the original and f(x) / f'(x)
+        // console.log(divide(f_x, f_prime_x))
+        points[col][row] = add(orig_point, multiply([-1, 0], divide(f_x, f_prime_x)))
+        // console.log(points[col][row], f_prime_x)
+    }
+
+    function render(){
+        // process roots into polynomial(s)
+        original = expand_polynomial(roots)
+        derivative = derivative_polynomial(original)
+        
+        // loops over every point (in order of their original position)
+        for (let col = 0; col < width; col++) {
+            for (let row = 0; row < height; row++) {
+                // evaluate newton's method level times
+                for (let iteration = 0; iteration < levels; iteration ++){
+                    approximate_once(row, col, original, derivative)
+                }
+                // does a check to see which root is closest
+                least_dist = Infinity
+                least_id = null
+
+                for (let index = 0; index < roots.length; index++) {
+                    point_of_interest = points[col][row]
+                    dist_to_root = distance(point_of_interest[0], point_of_interest[1],
+                                            roots[index][0], roots[index][1])
+                    
+                        if (dist_to_root < least_dist) {
+                        least_dist = dist_to_root
+                        least_id = index
+                    }
+                }
+                // then draw pixel
+                draw(row, col, least_id)
+            }
+        }
+    }
+
+    render()
+    // console.log(points)
+</script>
