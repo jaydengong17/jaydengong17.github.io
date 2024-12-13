@@ -2,22 +2,44 @@
 <script>
     const canvas = document.getElementById("canvas");
     const ctx = document.getElementById("canvas").getContext("2d");
-    const width = canvas.width
-    const height = canvas.height
-
-    let levels = 5
+    const width = canvas.width;
+    const height = canvas.height;
 
     // create 2d array of points
-    let points = []
+    let points = [];
     for(let i = 0; i < width; i++) {
-        temp = []
+        temp = [];
         for(let j = 0; j < height; j++) {
-            temp.push([i, j])
+            temp.push([i, j]);
         }
-        points.push(temp)
+        points.push(temp);
     }
 
-    roots = [[0, 500], [500, 0], [0, 0]]
+    let num_roots = 3; // this is the biggest possible id of an input
+    let levels = 5;
+
+    function getRoots(){
+        warning_p = document.getElementById("warning");
+        // get the root containers
+        const roots = document.getElementsByClassName('root_container');
+        
+        let root_list = [];
+        for (let i = 0; i < roots.length; i++){
+            // loop through every root and add the values of the x and y to a list
+            let root_div = roots[i];
+            const x_div = document.getElementById(root_div.id + "x");
+            const y_div = document.getElementById(root_div.id + "y");
+            // depending on if the user inputted a value, use value
+            if (!isNaN((x_div.value)) && x_div.value != "" && !isNaN(y_div.value) && y_div.value != "") {
+                root_list.push([parseInt(x_div.value),
+                                parseInt(y_div.value)]);
+            } else {
+                warning_p.innerHTML = "Values are either not inputted or formatted incorrectly.";
+                return []
+            }
+        }
+        return root_list;
+    }
 
     function expand_polynomial(expand_roots){
         // start with constant coefficient
@@ -35,7 +57,6 @@
 
             coefficients = new_coefficients
         }
-        console.log(coefficients)
         return coefficients
     }
 
@@ -46,7 +67,6 @@
             // then chain rule it, so multiply the power to the coefficient
             derivative_coefficients[derivative_index - 1] = multiply([derivative_index, 0], coefficients[derivative_index])
         }
-        console.log(derivative_coefficients)
         return derivative_coefficients
     }
 
@@ -88,8 +108,8 @@
         return Math.sqrt((a - c) ** 2 + (b - d) ** 2)
     }
 
-    function draw(x, y, id){
-        ctx.fillStyle = color(id, roots.length)
+    function draw(x, y, id, root_length){
+        ctx.fillStyle = color(id, root_length)
         ctx.fillRect(x,y,1,1);
     }
 
@@ -109,10 +129,30 @@
     }
 
     function render(){
+        // clear warning paragraph
+        document.getElementById("warning").innerHTML = ""
+
+        // reset the array of points (by making it again)
+        points = [];
+        for(let i = 0; i < width; i++) {
+            temp = [];
+            for(let j = 0; j < height; j++) {
+                temp.push([i, j]);
+            }
+            points.push(temp);
+        }
+
+        const roots = getRoots()
+
+        // check that root inputs are all fine
+        if (roots.length <= 0){
+            return
+        }
+
         // process roots into polynomial(s)
-        original = expand_polynomial(roots)
-        derivative = derivative_polynomial(original)
-        
+        let original = expand_polynomial(roots)
+        let derivative = derivative_polynomial(original)
+
         // loops over every point (in order of their original position)
         for (let col = 0; col < width; col++) {
             for (let row = 0; row < height; row++) {
@@ -121,25 +161,60 @@
                     approximate_once(row, col, original, derivative)
                 }
                 // does a check to see which root is closest
-                least_dist = Infinity
-                least_id = null
+                let least_dist = Infinity
+                let least_id = null
 
                 for (let index = 0; index < roots.length; index++) {
-                    point_of_interest = points[col][row]
-                    dist_to_root = distance(point_of_interest[0], point_of_interest[1],
-                                            roots[index][0], roots[index][1])
+                    let point_of_interest = points[col][row]
+                    let dist_to_root = distance(point_of_interest[0], point_of_interest[1],
+                                                roots[index][0], roots[index][1])
                     
                         if (dist_to_root < least_dist) {
-                        least_dist = dist_to_root
-                        least_id = index
+                        least_dist = dist_to_root;
+                        least_id = index;
                     }
                 }
                 // then draw pixel
-                draw(row, col, least_id)
+                draw(row, col, least_id, roots.length);
             }
         }
     }
 
-    render()
-    // console.log(points)
+    // some ui stuff
+    function addpoint(){
+        const roots_div = document.getElementById("points");
+        // create new point div
+        let new_point = document.createElement("div");
+        new_point.classList.add("root_container");
+        new_point.id = String(num_roots);
+
+        // create new point's stuff
+        let x_element = document.createElement("input");
+        x_element.id = String(num_roots) + "x";
+        let y_element = document.createElement("input");
+        y_element.id = String(num_roots) + "y";
+        let delete_element = document.createElement("input");
+        delete_element.type = "button";
+        delete_element.value = "Delete point";
+        
+        // add the new point's stuff
+        new_point.innerHTML += "(";
+        new_point.appendChild(x_element);
+        new_point.innerHTML += ", ";
+        new_point.appendChild(y_element);
+        new_point.innerHTML += ") ";
+        new_point.appendChild(delete_element);
+
+        roots_div.appendChild(new_point);
+        // so I know this is sketchy because the example divs have onclick attributes
+        // instead of event listeners, but...
+        let cur_num_roots = (" " + num_roots).concat("") // creates num_roots, but not pointing to the same thing
+        delete_element.addEventListener("click", function() {delete_point(cur_num_roots);});
+        num_roots ++;
+    }
+
+    function delete_point(point_number){
+        // div is called point_number
+        document.getElementById(point_number.trim()).remove();
+    }
 </script>
