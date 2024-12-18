@@ -7,6 +7,7 @@ author: "Jayden Gong"
 excerpt_seperator: <!--excerpt-->
 ---
 
+For polynomials
 Description not included yet, but UI works!
 {% include newton_fractal.html %}
 
