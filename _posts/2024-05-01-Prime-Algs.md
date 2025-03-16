@@ -149,7 +149,7 @@ but I did it in a pretty bad way.
 In the Sieve of Eratosthenes,
 it takes all the multiples and marks them down.
 In my algorithm,
-it takes all the multiples amd marks them down sequentially.
+it takes all the multiples and marks them down sequentially.
 
 Basically, the difference is that
 in the Sieve of Eratosthenes,
