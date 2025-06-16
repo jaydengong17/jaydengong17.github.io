@@ -52,6 +52,16 @@
                 default:
                     return false;
             }
+        } else if (mode == 1) {
+            if ("abcdefghijklmnopqrstuvwxyz ".includes(keyevent.key)) {
+                return keyevent.key
+            } else if (keyevent.key == "Backspace") {
+                return "back"
+            } else if (keyevent.key == "Enter") {
+                return "ret"
+            } else {
+                return false
+            }
         }
     }
 
@@ -72,6 +82,20 @@
             } else {
                 alerts.innerHTML = "Wrong!"
             }
+        } else if (mode == 1) {
+            if (string == cur_string[cur_letter]) {
+                // advance letter
+                cur_letter += 1
+                
+                // if finished
+                if (cur_letter == cur_string.length) {
+                    generate_text(10)
+                }
+
+                display_text_to_type()
+            } else {
+                alerts.innerHTML = "Wrong!"
+            }
         }
     }
 
@@ -80,8 +104,12 @@
         let string = "";
         for (let i = 0; i < length; i++) {
             string += possible_words[Math.floor(Math.random() * possible_words.length)];
-            string += " "
+            if (i != length - 1) {
+                string += " "
+            }
         }
+
+        console.log(string)
 
         cur_string = string
         cur_letter = 0
@@ -92,15 +120,47 @@
         const window_to_type = document.getElementById("text_display")
         sections_to_type = window_to_type.children // for the text highlighting
 
-        sections_to_type[0].innerHTML = cur_string.slice(0, cur_letter)
-        sections_to_type[1].innerHTML = cur_string[cur_letter]
-        sections_to_type[2].innerHTML = cur_string.slice(cur_letter + 1)
+        sections_to_type[0].innerHTML = modify_letters(cur_string.slice(0, cur_letter))
+        if (mode == 1) {
+            sections_to_type[0].innerHTML += " "
+        }
+        sections_to_type[1].innerHTML = modify_letters(cur_string[cur_letter])
+        if (mode == 1) {
+            sections_to_type[2].innerHTML = " "
+        } else {
+            sections_to_type[2].innerHTML = ""
+        }
+        sections_to_type[2].innerHTML += modify_letters(cur_string.slice(cur_letter + 1))
+    }
+
+    function modify_letters(string) {
+        if (mode == 0) {
+            return string
+        } else if (mode == 1) {
+            returning_string = ""
+            for (let i = 0; i < string.length; i++) {
+                returning_string += letter_to_morse[string[i]]
+                if (i != string.length - 1){
+                    returning_string += " "
+                }
+            }
+            return returning_string
+        }
+    }
+
+    function switch_mode(new_mode) {
+        mode = new_mode
+        generate_text(10)
     }
 </script>
 
 <div>
+    <div>
+        <button style="border: 0px;background-color: #aaa;" onclick="switch_mode(0)">Translate letters to morse code</button>
+        <button style="border: 0px;background-color: #aaa;" onclick="switch_mode(1)">Translate morse code to letters</button>
+    </div>
     <div id="text_display" style="border:2px solid #000;border-radius: 5px;padding:10px;font-family:monospace">
-        <span style="color:#777"></span><span style="color:#222;background-color:#aaa;"></span><span style="color: #222"></span>
+        <span style="color:#555"></span><span style="color:#222;background-color:#aaa;"></span><span style="color: #222"></span>
     </div>
     <p id="alerts"></p>
     <p id="text_input"></p>

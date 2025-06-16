@@ -20,7 +20,7 @@ but a lot of those lists were kind of political,
 so I decided to use the old list of all possible wordle answers.
 So, I guess this is kinda a wordle trainer now as well?
 
-Todo: add reading, add sound, add auto-submit
+Todo: add sound, add auto-submit
 
 <!--excerpt-->
 
