@@ -46,6 +46,7 @@ class World {
 class Thing {
     constructor (x, y, z, verts, edges) {
         this.origin = new Point(x, y, z);
+        this.negativeOrigin = new Point(-x, -y, -z);
         this.verts = verts;
         this.edges = edges;
         // so ig you rotate about z then y then x?
@@ -56,13 +57,21 @@ class Thing {
         this.gamma = 0;
         this.scale = 1;
     }
-    
-    getTransformedVerts(mat) {
-        return this.verts.map(p => p.multiplyByMatrix(mat));
+
+    getVerts() {
+        return this.verts.map((p) => p.copy());
     }
 
     getEdges() {
         return this.edges;
+    }
+    
+    getOrigin() {
+        return this.origin;
+    }
+    
+    getNegativeOrigin() {
+        return this.negativeOrigin;
     }
 
     getInverseRotationMatrix() {
@@ -118,6 +127,10 @@ class Cam {
         return rotMat;
     }
 
+    getOrigin() {
+        return this.origin;
+    }
+
     setRotation(a, b, c) {
         this.alpha = a;
         this.beta = b;
@@ -125,14 +138,43 @@ class Cam {
     }
 
     render(world) {
-        things = world.getThings();
+        let things = world.getThings();
         
-        things.forEach(function(thing) {
-            // transform the vertices by 
-            verts = getTransformedVerts(this.getRotationMatrix().multiplyByMatrix(getInverseRotationMatrix()));
+        things.forEach((thing) => {
+            // I should probably make a list of points a new type of object
+            let verts = thing.getVerts();
+            multiplyPointsByMatrix(verts, thing.getInverseRotationMatrix());
+            translatePoints(verts, thing.getNegativeOrigin());
+            translatePoints(verts, camera.getOrigin());
+            multiplyPointsByMatrix(verts, camera.getRotationMatrix());
 
+            // render???
+            verts = this.pointsToScreenCoords(verts);
+
+            // console.log(verts);
+
+            let edges = thing.getEdges();
+            
+            // console.log(edges);
+
+            edges.forEach((edge) => {drawLine(verts[edge[0]], verts[edge[1]], "#000")});
         }
         )
+    }
+
+    pointsToScreenCoords(points) {
+        return points.map((p) => this.toScreenCoords(p));
+    }
+
+    toScreenCoords(p) {
+        let screenX = WIDTH / 2;
+        let screenY = HEIGHT / 2;
+
+        // assume FOV is 90 degrees
+        screenX += p.x / p.z * WIDTH / 2;
+        screenY += p.y / p.z * HEIGHT / 2;
+
+        return new ScreenPoint(screenX, screenY);
     }
 }
 
@@ -162,6 +204,7 @@ class Mat {
     }
 }
 
+// mutable
 class Point {
     constructor (x, y, z) {
         this.x = x;
@@ -186,7 +229,20 @@ class Point {
         newy = this.x * mat.get(1,0) + this.y * mat.get(1,1) + this.z * mat.get(1,2);
         newz = this.x * mat.get(2,0) + this.y * mat.get(2,1) + this.z * mat.get(2,2);
 
-        return new Point(newx, newy, newz);
+        this.x = newx;
+        this.y = newy;
+        this.z = newz;
+    }
+
+    copy() {
+        return new Point(this.x, this.y, this.z);
+    }
+}
+
+class ScreenPoint {
+    constructor (x, y) {
+        this.x = x;
+        this.y = y;
     }
 }
 
@@ -195,45 +251,49 @@ class Point {
 function updateEverything() {
     camera.setRotation(0, totalScroll.x/sensitivity * Math.PI/2, totalScroll.y/sensitivity * Math.PI/2)
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    camera.render();
+    camera.render(world);
 }
 
 // function to do startup things
 onStartup();
 
 function onStartup() {
-    camera = new Cam();
+    camera = new Cam(0, 0, 0);
     world = new World();
 
     // adding a cube
-    world.addThing(new Thing(2, 0, 0, 
+    world.addThing(new Thing(0, 3, 0, 
         // spamming things
         [new Point(-1, -1, -1), new Point(-1, -1, 1), new Point(-1, 1, -1), new Point(-1, 1, 1), new Point(1, -1, -1), new Point(1, -1, 1), new Point(1, 1, -1), new Point(1, 1, 1)],
-        [(0, 1), (0, 2), (0, 4), (1, 3), (1, 5), (2, 3), (2, 6), (4, 5), (4, 6), (3, 7), (5, 7), (6, 7)]
+        [[0, 1], [0, 2], [0, 4], [1, 3], [1, 5], [2, 3], [2, 6], [4, 5], [4, 6], [3, 7], [5, 7], [6, 7]]
     ));
+}
+
+// ---------------- nice things ----------------
+
+function multiplyPointsByMatrix(points, mat) {
+    points.forEach(function(p) {p.multiplyByMatrix(mat)});
+}
+
+function translatePoints(points, translation) {
+    points.forEach(function(p) {p.translate(translation)});
 }
 
 // ---------------- canvas things ----------------
 
-function drawTest() {
-    ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    drawPoint(totalScroll.x + WIDTH / 2, totalScroll.y + HEIGHT / 2, "#0f0");
-    drawLine(totalScroll.x + WIDTH / 2, totalScroll.y + HEIGHT / 2, prevMousePos.x, prevMousePos.y, "#f00")
-}
-
-function drawPoint(x, y, color) {
+function drawPoint(sp, color) {
     ctx.strokeStyle = color;
     ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x+1, y+1);
+    ctx.moveTo(sp.x, sp.y);
+    ctx.lineTo(sp.x+1, sp.y+1);
     ctx.stroke();
 }
 
-function drawLine(x1, y1, x2, y2, color) {
+function drawLine(sp1, sp2, color) {
     ctx.strokeStyle = color;
     ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
+    ctx.moveTo(sp1.x, sp1.y);
+    ctx.lineTo(sp2.x, sp2.y);
     ctx.stroke();
 }
 
