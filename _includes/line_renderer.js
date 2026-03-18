@@ -1,0 +1,303 @@
+// yeah I'm using an actual file for js now yay
+
+const canvas = document.getElementById("canvas");
+const ctx = document.getElementById("canvas").getContext("2d");
+const HEIGHT = canvas.height;
+const WIDTH = canvas.width;
+
+// this controls how many pixels is a quarter rotation
+const sensitivity = 180;
+
+let totalScroll = {x:0, y:0};
+
+let mouseDown = false;
+let mouseOverCanvas = false;
+let prevMousePos = {x: 0, y: 0};
+
+let camera;
+let world;
+
+// ---------------- class declarations ----------------
+
+class World {
+    constructor() {
+        // maybe not the most effecient data structure for this
+        this.things = [];
+    }
+
+    addThing(thing) {
+        this.things.push(thing);
+    }
+
+    removeThing(thing) {
+        let index = this.things.indexOf(thing);
+        if (index > -1) {
+            this.things.splice(index, 1);
+        } else {
+            throw new Error("World didn't have the thing you wanted to remove inside it");
+        }
+    }
+
+    getThings() {
+        return this.things;
+    }
+}
+
+class Thing {
+    constructor (x, y, z, verts, edges) {
+        this.origin = new Point(x, y, z);
+        this.verts = verts;
+        this.edges = edges;
+        // so ig you rotate about z then y then x?
+        // idk if this works
+        // these are not actaully used at the moment
+        this.alpha = 0;
+        this.beta = 0;
+        this.gamma = 0;
+        this.scale = 1;
+    }
+    
+    getTransformedVerts(mat) {
+        return this.verts.map(p => p.multiplyByMatrix(mat));
+    }
+
+    getEdges() {
+        return this.edges;
+    }
+
+    getInverseRotationMatrix() {
+        // do like the opposite of the intrinsic thing
+
+        /* didn't do this because too complex
+        let rotMat = new Mat([
+            [],
+            [],
+            []
+        ]);
+        */
+
+        return new Mat([
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1]
+        ]);
+    }
+}
+
+class Cam {
+    constructor(x, y, z) {
+        this.origin = new Point(x, y, z);
+        this.alpha = 0; // this represents the z rotation, mostly keep this 0.
+        this.beta = 0;
+        this.gamma = 0;
+    }
+
+    getRotationMatrix() {
+        // do the intrinsic rotation
+        // this is the rotation about z
+        let rotMat = new Mat([
+            [1, 0, 0],
+            [0, Math.cos(this.alpha), Math.sin(this.alpha)],
+            [0, -Math.sin(this.alpha), Math.cos(this.alpha)]
+        ]);
+
+        // this is the rotation about y
+        rotMat = rotMat.multiplyByMatrix(new Mat([
+            [Math.cos(this.beta), 0, -Math.sin(this.beta)],
+            [0, 1, 0],
+            [Math.sin(this.beta), 0, Math.cos(this.beta)]
+        ]));
+
+        // this is the rotation about x
+        rotMat = rotMat.multiplyByMatrix(new Mat([
+            [Math.cos(this.gamma), Math.sin(this.gamma), 0],
+            [-Math.sin(this.gamma), Math.cos(this.gamma), 0],
+            [0, 0, 1]
+        ]))
+
+        return rotMat;
+    }
+
+    setRotation(a, b, c) {
+        this.alpha = a;
+        this.beta = b;
+        this.gamma = c;
+    }
+
+    render(world) {
+        things = world.getThings();
+        
+        things.forEach(function(thing) {
+            // transform the vertices by 
+            verts = getTransformedVerts(this.getRotationMatrix().multiplyByMatrix(getInverseRotationMatrix()));
+
+        }
+        )
+    }
+}
+
+class Mat {
+    // I hear there's quaternion something something something
+    // that sounds complex so I'll just do this instead
+    constructor (mat) {
+        // assume this is a 3x3 matrix
+        this.mat = mat;
+    }
+
+    get(x, y) {
+        return this.mat[x][y];
+    }
+
+    multiplyByMatrix(mat2) {
+        // time to write the most ugly piece of code in a while
+        let row0 = [0, 0, 0];
+        let row1 = [0, 0, 0];
+        let row2 = [0, 0, 0];
+        for (let i = 0; i < 3; i++) {
+            row0[i] = mat2.get(0, i) * this.get(0,0) + mat2.get(1, i) * this.get(0, 1) + mat2.get(2, i) * this.get(0, 2);
+            row1[i] = mat2.get(0, i) * this.get(1,0) + mat2.get(1, i) * this.get(1, 1) + mat2.get(2, i) * this.get(1, 2);
+            row2[i] = mat2.get(0, i) * this.get(2,0) + mat2.get(1, i) * this.get(2, 1) + mat2.get(2, i) * this.get(2, 2);
+        }
+        return new Mat([row0, row1, row2]);
+    }
+}
+
+class Point {
+    constructor (x, y, z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    translate (p) {
+        this.x += p.x;
+        this.y += p.y;
+        this.z += p.z;
+    }
+
+    multiplyByMatrix (mat) {
+        let newx = 0;
+        let newy = 0;
+        let newz = 0;
+
+        // I hear there's some fancy better algs for this
+        // but I don't care
+        newx = this.x * mat.get(0,0) + this.y * mat.get(0,1) + this.z * mat.get(0,2);
+        newy = this.x * mat.get(1,0) + this.y * mat.get(1,1) + this.z * mat.get(1,2);
+        newz = this.x * mat.get(2,0) + this.y * mat.get(2,1) + this.z * mat.get(2,2);
+
+        return new Point(newx, newy, newz);
+    }
+}
+
+// ---------------- functional things ----------------
+
+function updateEverything() {
+    camera.setRotation(0, totalScroll.x/sensitivity * Math.PI/2, totalScroll.y/sensitivity * Math.PI/2)
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    camera.render();
+}
+
+// function to do startup things
+onStartup();
+
+function onStartup() {
+    camera = new Cam();
+    world = new World();
+
+    // adding a cube
+    world.addThing(new Thing(2, 0, 0, 
+        // spamming things
+        [new Point(-1, -1, -1), new Point(-1, -1, 1), new Point(-1, 1, -1), new Point(-1, 1, 1), new Point(1, -1, -1), new Point(1, -1, 1), new Point(1, 1, -1), new Point(1, 1, 1)],
+        [(0, 1), (0, 2), (0, 4), (1, 3), (1, 5), (2, 3), (2, 6), (4, 5), (4, 6), (3, 7), (5, 7), (6, 7)]
+    ));
+}
+
+// ---------------- canvas things ----------------
+
+function drawTest() {
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    drawPoint(totalScroll.x + WIDTH / 2, totalScroll.y + HEIGHT / 2, "#0f0");
+    drawLine(totalScroll.x + WIDTH / 2, totalScroll.y + HEIGHT / 2, prevMousePos.x, prevMousePos.y, "#f00")
+}
+
+function drawPoint(x, y, color) {
+    ctx.strokeStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x+1, y+1);
+    ctx.stroke();
+}
+
+function drawLine(x1, y1, x2, y2, color) {
+    ctx.strokeStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+}
+
+// ---------------- testing stuff ---------------- 
+
+function drawTest() {
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+    drawPoint(totalScroll.x + WIDTH / 2, totalScroll.y + HEIGHT / 2, "#0f0");
+    drawLine(totalScroll.x + WIDTH / 2, totalScroll.y + HEIGHT / 2, prevMousePos.x, prevMousePos.y, "#f00")
+}
+
+// ---------------- UI stuff ----------------
+
+function updateMousePos(e) {
+    if (!mouseOverCanvas) {
+        // this prevents this function from firing on the first instance
+        // when the mouse is over the canvas, until the mouseOverChange has done its job
+        // and reset the prevMousePos.
+        return;
+    }
+
+    // update mouse position.
+
+    let rect = canvas.getBoundingClientRect();
+    
+    let mousePos = {x: 0, y: 0};
+
+    mousePos.x = e.clientX - rect.left;
+    mousePos.y = e.clientY - rect.top;
+
+    // depending on whether the mouse is down, scroll the x and y or don't.
+
+    if (mouseDown) {
+        // add how much it scrolled
+        totalScroll.x += mousePos.x - prevMousePos.x;
+        totalScroll.y += mousePos.y - prevMousePos.y;
+        // clamp scroll in y
+        totalScroll.y = Math.max(Math.min(totalScroll.y, sensitivity), -sensitivity);
+    }
+    
+    // set the old mouse position
+    prevMousePos = mousePos;
+
+    // every time the mouse moves we have to update everything.
+    updateEverything();
+}
+
+function mouseDownChange(e, down) {
+    mouseDown = down;
+}
+
+function mouseOverChange(e, inside) {
+    if (inside) {
+        // then we need to reset the mouse position
+        let rect = canvas.getBoundingClientRect();
+
+        prevMousePos = {x: e.clientX - rect.left, y: e.clientY - rect.top};
+
+        // reset mouseDown-nesss (this checks if left click)
+        mouseDown = (e.buttons & 1) == 1;
+        mouseOverCanvas = true;
+    } else {
+        // then we need to make everything false
+        mouseDown = false;
+        mouseOverCanvas = false;
+    }
+}
