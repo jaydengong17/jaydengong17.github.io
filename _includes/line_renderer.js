@@ -44,11 +44,12 @@ class World {
 }
 
 class Thing {
-    constructor (x, y, z, verts, edges) {
+    constructor (x, y, z, verts, edges, color) {
         this.origin = new Point(x, y, z);
         this.negativeOrigin = new Point(-x, -y, -z);
         this.verts = verts;
         this.edges = edges;
+        this.color = color;
         // so ig you rotate about z then y then x?
         // idk if this works
         // these are not actaully used at the moment
@@ -157,7 +158,11 @@ class Cam {
             
             // console.log(edges);
 
-            edges.forEach((edge) => {drawLine(verts[edge[0]], verts[edge[1]], "#000")});
+            edges.forEach((edge) => {
+                if (verts[edge[0]].bad && verts[edge[1]].bad) {
+                    drawLine(verts[edge[0]], verts[edge[1]], thing.color);
+                }
+            });
         }
         )
     }
@@ -174,7 +179,7 @@ class Cam {
         screenX += p.x / p.z * WIDTH / 2;
         screenY += p.y / p.z * HEIGHT / 2;
 
-        return new ScreenPoint(screenX, screenY);
+        return new ScreenPoint(screenX, screenY, p.z < 0);
     }
 }
 
@@ -239,10 +244,13 @@ class Point {
     }
 }
 
+// not permanent, probably
 class ScreenPoint {
-    constructor (x, y) {
+    constructor (x, y, bad) {
         this.x = x;
         this.y = y;
+        // temporary fix
+        this.bad = bad;
     }
 }
 
@@ -265,8 +273,27 @@ function onStartup() {
     world.addThing(new Thing(0, 3, 0, 
         // spamming things
         [new Point(-1, -1, -1), new Point(-1, -1, 1), new Point(-1, 1, -1), new Point(-1, 1, 1), new Point(1, -1, -1), new Point(1, -1, 1), new Point(1, 1, -1), new Point(1, 1, 1)],
-        [[0, 1], [0, 2], [0, 4], [1, 3], [1, 5], [2, 3], [2, 6], [4, 5], [4, 6], [3, 7], [5, 7], [6, 7]]
+        [[0, 1], [0, 2], [0, 4], [1, 3], [1, 5], [2, 3], [2, 6], [4, 5], [4, 6], [3, 7], [5, 7], [6, 7]],
+        "#0f0"
     ));
+
+    // adding another cube
+    world.addThing(new Thing(3, 0, 0, 
+        // spamming things
+        [new Point(-1, -1, -1), new Point(-1, -1, 1), new Point(-1, 1, -1), new Point(-1, 1, 1), new Point(1, -1, -1), new Point(1, -1, 1), new Point(1, 1, -1), new Point(1, 1, 1)],
+        [[0, 1], [0, 2], [0, 4], [1, 3], [1, 5], [2, 3], [2, 6], [4, 5], [4, 6], [3, 7], [5, 7], [6, 7]],
+        "#f00"
+    ));
+
+    // adding a cube
+    world.addThing(new Thing(0, 0, 3, 
+        // spamming things
+        [new Point(-1, -1, -1), new Point(-1, -1, 1), new Point(-1, 1, -1), new Point(-1, 1, 1), new Point(1, -1, -1), new Point(1, -1, 1), new Point(1, 1, -1), new Point(1, 1, 1)],
+        [[0, 1], [0, 2], [0, 4], [1, 3], [1, 5], [2, 3], [2, 6], [4, 5], [4, 6], [3, 7], [5, 7], [6, 7]],
+        "#00f"
+    ));
+
+    updateEverything();
 }
 
 // ---------------- nice things ----------------
