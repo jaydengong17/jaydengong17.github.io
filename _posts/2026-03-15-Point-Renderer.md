@@ -16,6 +16,8 @@ In no way is this final, I'll probably add way more stuff.
 I also need to fix a lot of stuff.
 
 Here, x is red cube, y is green cube, z is blue cube.
+They are rotating about their axes.
+The black shape is rotating about everything composed.
 
 Hold and drag to move around camera
 
@@ -29,9 +31,9 @@ Hold and drag to move around camera
 ### Features to be implemented
 
  - filling in the sides (eventually textures maybe?)
- - rotation of objects
  - rigorous rendering
  - rigorous culling
+ - fov and stuff
  - movement of camera
  - some primitive type of lighting
  - add explanation of the rendering maybe?
@@ -39,6 +41,8 @@ Hold and drag to move around camera
 
 ### Changelog
 idk how you're supposed to do these so I'm just yapping
+
+03/18/2026: Added object rotations, yes.
 
 03/17/2026: Made previous version less buggy, so the camera works
 

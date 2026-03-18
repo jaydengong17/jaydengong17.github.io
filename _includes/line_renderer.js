@@ -76,21 +76,47 @@ class Thing {
     }
 
     getRotationMatrix() {
-        // do like the opposite of the intrinsic thing
-
-        /* didn't do this because too complex
+        // do the intrinsic rotation
         let rotMat = new Mat([
-            [],
-            [],
-            []
-        ]);
-        */
-
-        return new Mat([
             [1, 0, 0],
             [0, 1, 0],
+            [0, 0, 1]]
+        );
+
+        // this is the rotation about z
+        rotMat = rotMat.multiplyByMatrix(new Mat([
+            [Math.cos(this.alpha), -Math.sin(this.alpha), 0],
+            [Math.sin(this.alpha), Math.cos(this.alpha), 0],
             [0, 0, 1]
-        ]);
+        ]));
+
+        // this is the rotation about y
+        rotMat = rotMat.multiplyByMatrix(new Mat([
+            [Math.cos(this.beta), 0, Math.sin(this.beta)],
+            [0, 1, 0],
+            [-Math.sin(this.beta), 0, Math.cos(this.beta)]
+        ]));
+
+        // this is the rotation about x
+        rotMat = rotMat.multiplyByMatrix(new Mat([
+            [1, 0, 0],
+            [0, Math.cos(this.gamma), -Math.sin(this.gamma)],
+            [0, Math.sin(this.gamma), Math.cos(this.gamma)]
+        ]));
+
+        return rotMat;
+    }
+
+    setEdges(a, b, c) {
+        this.alpha = a;
+        this.beta = b;
+        this.gamma = c;
+    }
+
+    setRotation(a, b, c) {
+        this.alpha = a;
+        this.beta = b;
+        this.gamma = c;
     }
 }
 
@@ -130,7 +156,7 @@ class Cam {
             [Math.cos(this.alpha), Math.sin(this.alpha), 0],
             [-Math.sin(this.alpha), Math.cos(this.alpha), 0],
             [0, 0, 1]
-        ]))
+        ]));
 
         return rotMat;
     }
@@ -267,6 +293,10 @@ class ScreenPoint {
 
 function updateEverything() {
     camera.setRotation(0, -totalScroll.x/sensitivity * Math.PI/2, totalScroll.y/sensitivity * Math.PI/2)
+    world.getThings()[0].setRotation(0, Date.now() / 1000, 0);
+    world.getThings()[1].setRotation(0, 0, Date.now() / 1000);
+    world.getThings()[2].setRotation(Date.now() / 1000, 0, 0);
+    world.getThings()[3].setRotation(Date.now() / 1000, Date.now() / 1000, Date.now() / 1000);
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
     camera.render(world);
 }
@@ -302,6 +332,15 @@ function onStartup() {
         "#00f"
     ));
 
+    // adding a cube
+    world.addThing(new Thing(-3, -3, -3, 
+        // spamming things
+        [new Point(-1, -1, -1), new Point(-1, -1, 1), new Point(-1, 1, -1), new Point(1, -1, -1), new Point(1, 1, 1), new Point(1, 1, -1), new Point(1, -1, 1), new Point(-1, 1, 1)],
+        [[0, 1], [0, 2], [0, 3], [1, 2], [2, 3], [3, 1], [4, 5], [4, 6], [4, 7], [5, 6], [6, 7], [7, 5]],
+        "#000"
+    ));
+
+    setInterval(updateEverything, 10);
     updateEverything();
 }
 
@@ -372,9 +411,6 @@ function updateMousePos(e) {
     
     // set the old mouse position
     prevMousePos = mousePos;
-
-    // every time the mouse moves we have to update everything.
-    updateEverything();
 }
 
 function mouseDownChange(e, down) {
