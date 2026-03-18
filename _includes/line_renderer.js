@@ -75,7 +75,7 @@ class Thing {
         return this.negativeOrigin;
     }
 
-    getInverseRotationMatrix() {
+    getRotationMatrix() {
         // do like the opposite of the intrinsic thing
 
         /* didn't do this because too complex
@@ -97,19 +97,26 @@ class Thing {
 class Cam {
     constructor(x, y, z) {
         this.origin = new Point(x, y, z);
+        this.negativeOrigin = new Point(-x, -y, -z);
         this.alpha = 0; // this represents the z rotation, mostly keep this 0.
         this.beta = 0;
         this.gamma = 0;
     }
 
-    getRotationMatrix() {
+    getInverseRotationMatrix() {
         // do the intrinsic rotation
-        // this is the rotation about z
         let rotMat = new Mat([
             [1, 0, 0],
-            [0, Math.cos(this.alpha), Math.sin(this.alpha)],
-            [0, -Math.sin(this.alpha), Math.cos(this.alpha)]
-        ]);
+            [0, 1, 0],
+            [0, 0, 1]]
+        );
+
+        // this is the rotation about x
+        rotMat = rotMat.multiplyByMatrix(new Mat([
+            [1, 0, 0],
+            [0, Math.cos(this.gamma), Math.sin(this.gamma)],
+            [0, -Math.sin(this.gamma), Math.cos(this.gamma)]
+        ]));
 
         // this is the rotation about y
         rotMat = rotMat.multiplyByMatrix(new Mat([
@@ -118,10 +125,10 @@ class Cam {
             [Math.sin(this.beta), 0, Math.cos(this.beta)]
         ]));
 
-        // this is the rotation about x
+        // this is the rotation about z
         rotMat = rotMat.multiplyByMatrix(new Mat([
-            [Math.cos(this.gamma), Math.sin(this.gamma), 0],
-            [-Math.sin(this.gamma), Math.cos(this.gamma), 0],
+            [Math.cos(this.alpha), Math.sin(this.alpha), 0],
+            [-Math.sin(this.alpha), Math.cos(this.alpha), 0],
             [0, 0, 1]
         ]))
 
@@ -130,6 +137,10 @@ class Cam {
 
     getOrigin() {
         return this.origin;
+    }
+
+    getNegativeOrigin() {
+        return this.negativeOrigin;
     }
 
     setRotation(a, b, c) {
@@ -144,19 +155,15 @@ class Cam {
         things.forEach((thing) => {
             // I should probably make a list of points a new type of object
             let verts = thing.getVerts();
-            multiplyPointsByMatrix(verts, thing.getInverseRotationMatrix());
-            translatePoints(verts, thing.getNegativeOrigin());
-            translatePoints(verts, camera.getOrigin());
-            multiplyPointsByMatrix(verts, camera.getRotationMatrix());
+            multiplyPointsByMatrix(verts, thing.getRotationMatrix());
+            translatePoints(verts, thing.getOrigin());
+            translatePoints(verts, this.getNegativeOrigin());
+            multiplyPointsByMatrix(verts, this.getInverseRotationMatrix());
 
             // render???
             verts = this.pointsToScreenCoords(verts);
 
-            // console.log(verts);
-
             let edges = thing.getEdges();
-            
-            // console.log(edges);
 
             edges.forEach((edge) => {
                 if (verts[edge[0]].bad && verts[edge[1]].bad) {
@@ -176,10 +183,12 @@ class Cam {
         let screenY = HEIGHT / 2;
 
         // assume FOV is 90 degrees
-        screenX += p.x / p.z * WIDTH / 2;
-        screenY += p.y / p.z * HEIGHT / 2;
+        // assume that camera oriented 0, 0, 0 => facing positive z direction
+        // then x and y go opposite to the way html canvas orients
+        screenX -= p.x / p.z * WIDTH / 2;
+        screenY -= p.y / p.z * HEIGHT / 2;
 
-        return new ScreenPoint(screenX, screenY, p.z < 0);
+        return new ScreenPoint(screenX, screenY, p.z > 0);
     }
 }
 
@@ -257,7 +266,7 @@ class ScreenPoint {
 // ---------------- functional things ----------------
 
 function updateEverything() {
-    camera.setRotation(0, totalScroll.x/sensitivity * Math.PI/2, totalScroll.y/sensitivity * Math.PI/2)
+    camera.setRotation(0, -totalScroll.x/sensitivity * Math.PI/2, totalScroll.y/sensitivity * Math.PI/2)
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
     camera.render(world);
 }
