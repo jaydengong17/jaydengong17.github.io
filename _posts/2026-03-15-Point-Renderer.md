@@ -19,7 +19,9 @@ Here, x is red cube, y is green cube, z is blue cube.
 They are rotating CCW about their axes.
 The black shape is rotating about everything composed.
 
-Hold and drag to move around camera, wasd controls and space, shift for down, up respectively
+Hold and drag to move around camera
+
+w = forward, a = left, s = back, d = right, shift = down, space = up
 
 <!--excerpt-->
 
