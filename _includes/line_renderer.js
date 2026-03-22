@@ -8,11 +8,17 @@ const WIDTH = canvas.width;
 // this controls how many pixels is a quarter rotation
 const sensitivity = 180;
 
+const msBetweenFrames = 10;
+
 let totalScroll = {x:0, y:0};
 
 let mouseDown = false;
 let mouseOverCanvas = false;
 let prevMousePos = {x: 0, y: 0};
+// space, shift, w, a, s, d
+let keys = 0;
+
+let cameraVelocity = 10;
 
 let camera;
 let world;
@@ -123,10 +129,41 @@ class Thing {
 class Cam {
     constructor(x, y, z) {
         this.origin = new Point(x, y, z);
-        this.negativeOrigin = new Point(-x, -y, -z);
         this.alpha = 0; // this represents the z rotation, mostly keep this 0.
         this.beta = 0;
         this.gamma = 0;
+    }
+
+    getRotationMatrix() {
+        // do the intrinsic rotation
+        let rotMat = new Mat([
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1]]
+        );
+
+        // this is the rotation about z
+        rotMat = rotMat.multiplyByMatrix(new Mat([
+            [Math.cos(this.alpha), -Math.sin(this.alpha), 0],
+            [Math.sin(this.alpha), Math.cos(this.alpha), 0],
+            [0, 0, 1]
+        ]));
+        
+        // this is the rotation about y
+        rotMat = rotMat.multiplyByMatrix(new Mat([
+            [Math.cos(this.beta), 0, Math.sin(this.beta)],
+            [0, 1, 0],
+            [-Math.sin(this.beta), 0, Math.cos(this.beta)]
+        ]));
+
+        // this is the rotation about x
+        rotMat = rotMat.multiplyByMatrix(new Mat([
+            [1, 0, 0],
+            [0, Math.cos(this.gamma), -Math.sin(this.gamma)],
+            [0, Math.sin(this.gamma), Math.cos(this.gamma)]
+        ]));
+        
+        return rotMat;
     }
 
     getInverseRotationMatrix() {
@@ -166,7 +203,7 @@ class Cam {
     }
 
     getNegativeOrigin() {
-        return this.negativeOrigin;
+        return new Point(-this.origin.x, -this.origin.y, -this.origin.z);
     }
 
     setRotation(a, b, c) {
@@ -215,6 +252,51 @@ class Cam {
         screenY -= p.y / p.z * HEIGHT / 2;
 
         return new ScreenPoint(screenX, screenY, p.z > 0);
+    }
+
+    move() {
+        let xVelocity = 0;
+        let yVelocity = 0;
+        let zVelocity = 0;
+
+        if ((keys & 0b100000) != 0) { // space
+            yVelocity += 1;
+        }
+        
+        if ((keys & 0b010000) != 0) { // shift
+            yVelocity -= 1;
+        }
+        
+        if ((keys & 0b001000) != 0) { // w
+            zVelocity += 1;
+        }
+        
+        if ((keys & 0b000010) != 0) { // s
+            zVelocity -= 1;
+        }
+
+        if ((keys & 0b000001) != 0) { // d
+            xVelocity -= 1;
+        }
+        
+        if ((keys & 0b000100) != 0) { // a
+            xVelocity += 1;
+        }
+        
+        let dir = new Point(xVelocity, yVelocity, zVelocity);
+        dir.normalize();
+
+        // rotate about y
+        dir.multiplyByMatrix(new Mat([
+            [Math.cos(this.beta), 0, Math.sin(this.beta)],
+            [0, 1, 0],
+            [-Math.sin(this.beta), 0, Math.cos(this.beta)]
+        ]));
+
+        // scale velocity
+        dir.multiplyByScalar(cameraVelocity * msBetweenFrames / 1000);
+
+        this.origin.translate(dir);
     }
 }
 
@@ -277,6 +359,23 @@ class Point {
     copy() {
         return new Point(this.x, this.y, this.z);
     }
+
+    normalize() {
+        if (this.x == 0 && this.y == 0 && this.z == 0) {
+            return;
+        } else {
+            let dist = Math.sqrt(this.x ** 2 + this.y ** 2 + this.z ** 2);
+            this.x = this.x / dist;
+            this.y = this.y / dist;
+            this.z = this.z / dist;
+        }
+    }
+
+    multiplyByScalar(scalar) {
+        this.x *= scalar;
+        this.y *= scalar;
+        this.z *= scalar;
+    }
 }
 
 // not permanent, probably
@@ -293,6 +392,7 @@ class ScreenPoint {
 
 function updateEverything() {
     camera.setRotation(0, -totalScroll.x/sensitivity * Math.PI/2, totalScroll.y/sensitivity * Math.PI/2)
+    camera.move()
     world.getThings()[0].setRotation(0, Date.now() / 1000, 0);
     world.getThings()[1].setRotation(0, 0, Date.now() / 1000);
     world.getThings()[2].setRotation(Date.now() / 1000, 0, 0);
@@ -307,6 +407,9 @@ onStartup();
 function onStartup() {
     camera = new Cam(0, 0, 0);
     world = new World();
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
 
     // adding a cube
     world.addThing(new Thing(0, 3, 0, 
@@ -340,7 +443,7 @@ function onStartup() {
         "#000"
     ));
 
-    setInterval(updateEverything, 10);
+    setInterval(updateEverything, msBetweenFrames);
     updateEverything();
 }
 
@@ -431,5 +534,63 @@ function mouseOverChange(e, inside) {
         // then we need to make everything false
         mouseDown = false;
         mouseOverCanvas = false;
+    }
+}
+
+function handleKeyDown(e) {
+    e.preventDefault();
+    if (e.repeat) {
+        return;
+    }
+    switch (e.code) {
+        case "Space":
+            keys = keys | 0b100000;
+            break;
+        case "ShiftLeft":
+            keys = keys | 0b010000;
+            break;
+        case "ShiftRight":
+            keys = keys | 0b010000;
+            break;
+        case "KeyW":
+            keys = keys | 0b001000;
+            break;
+        case "KeyA":
+            keys = keys | 0b000100;
+            break;
+        case "KeyS":
+            keys = keys | 0b000010;
+            break;
+        case "KeyD":
+            keys = keys | 0b000001;
+            break;
+        default:
+    }
+}
+
+function handleKeyUp(e) {
+    switch (e.code) {
+        case "Space":
+            keys = keys & 0b011111;
+            break;
+        case "ShiftLeft":
+            keys = keys & 0b101111;
+            break;
+        case "ShiftRight":
+            keys = keys & 0b101111;
+            break;
+        case "KeyW":
+            keys = keys & 0b110111;
+            break;
+        case "KeyA":
+            keys = keys & 0b111011;
+            break;
+        case "KeyS":
+            keys = keys & 0b111101;
+            break;
+        case "KeyD":
+            keys = keys & 0b111110;
+            break;
+        default:
     }
 }

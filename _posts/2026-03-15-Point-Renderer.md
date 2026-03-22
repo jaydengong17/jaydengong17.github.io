@@ -16,10 +16,10 @@ In no way is this final, I'll probably add way more stuff.
 I also need to fix a lot of stuff.
 
 Here, x is red cube, y is green cube, z is blue cube.
-They are rotating about their axes.
+They are rotating CCW about their axes.
 The black shape is rotating about everything composed.
 
-Hold and drag to move around camera
+Hold and drag to move around camera, wasd controls and space, shift for down, up respectively
 
 <!--excerpt-->
 
@@ -34,13 +34,14 @@ Hold and drag to move around camera
  - rigorous rendering
  - rigorous culling
  - fov and stuff
- - movement of camera
  - some primitive type of lighting
  - add explanation of the rendering maybe?
 
 
 ### Changelog
 idk how you're supposed to do these so I'm just yapping
+
+03/22/2026: Camera can move.
 
 03/18/2026: Added object rotations, yes.
 
