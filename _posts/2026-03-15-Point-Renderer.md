@@ -39,6 +39,7 @@ w = forward, a = left, s = back, d = right, shift = down, space = up
  - some primitive type of lighting
  - add explanation of the rendering maybe?
 
+update: rigorous culling is difficult. idk if that's the right term to use either.
 
 ### Changelog
 idk how you're supposed to do these so I'm just yapping
