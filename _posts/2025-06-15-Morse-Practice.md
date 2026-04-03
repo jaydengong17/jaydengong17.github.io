@@ -20,6 +20,9 @@ but a lot of those lists were kind of political,
 so I decided to use the old list of all possible wordle answers.
 So, I guess this is kinda a wordle trainer now as well?
 
+You have to press enter to submit a single letter at a time.
+For the to morse code mode, a, f, j, space also work.
+
 Todo: add sound, add auto-submit
 
 <!--excerpt-->

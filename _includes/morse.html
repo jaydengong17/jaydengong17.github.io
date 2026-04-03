@@ -37,6 +37,7 @@
 
     // figures out if the key event is something we care about
     function filterKeys(keyevent, mode) {
+        console.log(keyevent.key);
         if (mode == 0){
             switch (keyevent.key) {
                 case ".":
@@ -45,16 +46,18 @@
                     return "-";
                 case "/":
                     return "/";
-                case "f":
-                    return ".";
-                case "j":
-                    return "-"
-                case "Space":
-                    return "ret";
                 case "Backspace":
                     return "back";
                 case "Enter":
                     return "ret";
+                case "f":
+                    return ".";
+                case "j":
+                    return "-"
+                case " ":
+                    return "ret";
+                case "a":
+                    return "/";
                 default:
                     return false;
             }
