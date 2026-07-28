@@ -254,6 +254,7 @@ class Cam {
         return new ScreenPoint(screenX, screenY, p.z > 0);
     }
 
+    // move using the keypresses
     move() {
         let xVelocity = 0;
         let yVelocity = 0;
@@ -297,6 +298,14 @@ class Cam {
         dir.multiplyByScalar(cameraVelocity * msBetweenFrames / 1000);
 
         this.origin.translate(dir);
+    }
+
+    moveBy(x, y, z) {
+        this.origin.translate(new Point(x, y, z));
+    }
+
+    moveTo(x, y, z) {
+        this.origin = new Point(x, y, z);
     }
 }
 
@@ -391,19 +400,18 @@ class ScreenPoint {
 // ---------------- functional things ----------------
 
 function updateEverything() {
-    camera.setRotation(0, -totalScroll.x/sensitivity * Math.PI/2, totalScroll.y/sensitivity * Math.PI/2)
-    camera.move()
-    world.getThings()[0].setRotation(0, Date.now() / 1000, 0);
-    world.getThings()[1].setRotation(0, 0, Date.now() / 1000);
-    world.getThings()[2].setRotation(Date.now() / 1000, 0, 0);
-    world.getThings()[3].setRotation(Date.now() / 1000, Date.now() / 1000, Date.now() / 1000);
+    // for some updating the objects and stuff if needed
+    // only runs if the function is defined
+    if (typeof window.updateThings === "function") {
+        window.updateThings();
+    }
+
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
     camera.render(world);
 }
 
-// function to do startup things
-onStartup();
-
+// function to do startup things.
+// call after you have implemented the startupAddThings function.
 function onStartup() {
     camera = new Cam(0, 0, 0);
     world = new World();
@@ -411,37 +419,7 @@ function onStartup() {
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("keyup", handleKeyUp);
 
-    // adding a cube
-    world.addThing(new Thing(0, 3, 0, 
-        // spamming things
-        [new Point(-1, -1, -1), new Point(-1, -1, 1), new Point(-1, 1, -1), new Point(-1, 1, 1), new Point(1, -1, -1), new Point(1, -1, 1), new Point(1, 1, -1), new Point(1, 1, 1)],
-        [[0, 1], [0, 2], [0, 4], [1, 3], [1, 5], [2, 3], [2, 6], [4, 5], [4, 6], [3, 7], [5, 7], [6, 7]],
-        "#0f0"
-    ));
-
-    // adding another cube
-    world.addThing(new Thing(3, 0, 0, 
-        // spamming things
-        [new Point(-1, -1, -1), new Point(-1, -1, 1), new Point(-1, 1, -1), new Point(-1, 1, 1), new Point(1, -1, -1), new Point(1, -1, 1), new Point(1, 1, -1), new Point(1, 1, 1)],
-        [[0, 1], [0, 2], [0, 4], [1, 3], [1, 5], [2, 3], [2, 6], [4, 5], [4, 6], [3, 7], [5, 7], [6, 7]],
-        "#f00"
-    ));
-
-    // adding a cube
-    world.addThing(new Thing(0, 0, 3, 
-        // spamming things
-        [new Point(-1, -1, -1), new Point(-1, -1, 1), new Point(-1, 1, -1), new Point(-1, 1, 1), new Point(1, -1, -1), new Point(1, -1, 1), new Point(1, 1, -1), new Point(1, 1, 1)],
-        [[0, 1], [0, 2], [0, 4], [1, 3], [1, 5], [2, 3], [2, 6], [4, 5], [4, 6], [3, 7], [5, 7], [6, 7]],
-        "#00f"
-    ));
-
-    // adding a cube
-    world.addThing(new Thing(-3, -3, -3, 
-        // spamming things
-        [new Point(-1, -1, -1), new Point(-1, -1, 1), new Point(-1, 1, -1), new Point(1, -1, -1), new Point(1, 1, 1), new Point(1, 1, -1), new Point(1, -1, 1), new Point(-1, 1, 1)],
-        [[0, 1], [0, 2], [0, 3], [1, 2], [2, 3], [3, 1], [4, 5], [4, 6], [4, 7], [5, 6], [6, 7], [7, 5]],
-        "#000"
-    ));
+    startupAddThings();
 
     setInterval(updateEverything, msBetweenFrames);
     updateEverything();

@@ -28,6 +28,53 @@ w = forward, a = left, s = back, d = right, shift = down, space = up
 {%include line_renderer.html%}
 <script>
 {%include line_renderer.js%}
+
+// hardcoded example
+function startupAddThings() {
+    // adding a cube
+    world.addThing(new Thing(0, 3, 0, 
+        // spamming things
+        [new Point(-1, -1, -1), new Point(-1, -1, 1), new Point(-1, 1, -1), new Point(-1, 1, 1), new Point(1, -1, -1), new Point(1, -1, 1), new Point(1, 1, -1), new Point(1, 1, 1)],
+        [[0, 1], [0, 2], [0, 4], [1, 3], [1, 5], [2, 3], [2, 6], [4, 5], [4, 6], [3, 7], [5, 7], [6, 7]],
+        "#0f0"
+    ));
+
+    // adding another cube
+    world.addThing(new Thing(3, 0, 0, 
+        // spamming things
+        [new Point(-1, -1, -1), new Point(-1, -1, 1), new Point(-1, 1, -1), new Point(-1, 1, 1), new Point(1, -1, -1), new Point(1, -1, 1), new Point(1, 1, -1), new Point(1, 1, 1)],
+        [[0, 1], [0, 2], [0, 4], [1, 3], [1, 5], [2, 3], [2, 6], [4, 5], [4, 6], [3, 7], [5, 7], [6, 7]],
+        "#f00"
+    ));
+
+    // adding a cube
+    world.addThing(new Thing(0, 0, 3, 
+        // spamming things
+        [new Point(-1, -1, -1), new Point(-1, -1, 1), new Point(-1, 1, -1), new Point(-1, 1, 1), new Point(1, -1, -1), new Point(1, -1, 1), new Point(1, 1, -1), new Point(1, 1, 1)],
+        [[0, 1], [0, 2], [0, 4], [1, 3], [1, 5], [2, 3], [2, 6], [4, 5], [4, 6], [3, 7], [5, 7], [6, 7]],
+        "#00f"
+    ));
+
+    // adding a cube
+    world.addThing(new Thing(-3, -3, -3, 
+        // spamming things
+        [new Point(-1, -1, -1), new Point(-1, -1, 1), new Point(-1, 1, -1), new Point(1, -1, -1), new Point(1, 1, 1), new Point(1, 1, -1), new Point(1, -1, 1), new Point(-1, 1, 1)],
+        [[0, 1], [0, 2], [0, 3], [1, 2], [2, 3], [3, 1], [4, 5], [4, 6], [4, 7], [5, 6], [6, 7], [7, 5]],
+        "#000"
+    ));
+}
+
+function updateThings() {
+    camera.setRotation(0, -totalScroll.x/sensitivity * Math.PI/2, totalScroll.y/sensitivity * Math.PI/2)
+    camera.move()
+
+    world.getThings()[0].setRotation(0, Date.now() / 1000, 0);
+    world.getThings()[1].setRotation(0, 0, Date.now() / 1000);
+    world.getThings()[2].setRotation(Date.now() / 1000, 0, 0);
+    world.getThings()[3].setRotation(Date.now() / 1000, Date.now() / 1000, Date.now() / 1000);
+}
+
+onStartup();
 </script>
 
 ### Features to be implemented
@@ -43,6 +90,8 @@ update: rigorous culling is difficult. idk if that's the right term to use eithe
 
 ### Changelog
 idk how you're supposed to do these so I'm just yapping
+
+07/27/2026: Made it a bit more adaptable because I wanted to use it in a different post.
 
 03/22/2026: Camera can move.
 
