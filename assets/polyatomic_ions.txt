@@ -1,0 +1,28 @@
+ammonium,nh4,1
+nitrite,no2,-1
+nitrate,no3,-1
+sulfite,so3,-2
+sulfate,so4,-2
+hydrogen sulfide,hso4,-1
+thisulfate,s2o3,-2
+oxalate,c2o4,-2
+hydroxide,oh,-1
+phosphite,po3,-3
+phosphate,po4,-3
+hydrogen phosphate,hpo4,-2
+dihydrogen phosphate,h2po4,-1
+perchlorate,clo4,-1
+chlorate,clo3,-1
+chlorite,clo2,-1
+hypochlorite,clo,-1
+bromate,bro3,-1
+iodate,io3,-1
+acetate,c2h3o2,-1
+carbonate,co3,-2
+hydrogen carbonate,hco3,-1
+chromate,cro4,-2
+dichromate,cr2o7,-2
+permanganate,mno4,-1
+peroxide,o2,-2
+cyanide,cn,-1
+thiocyanate,scn,-1

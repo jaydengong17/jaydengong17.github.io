@@ -1,0 +1,182 @@
+<button id="start_button" onclick="startTest()" disabled="true">loading ions...</button>
+<span id="grade">Your grade: -/-</span>
+
+<table id="that_table">
+    <thead>
+        <td>Name</td>
+        <td>Formula</td>
+        <td>Charge</td>
+    </thead>
+    <tbody>
+        <tr>
+            <!-- when is css dropping? -->
+            <td><input type="text" id="name" style="border: none; width: 100%; height:100%; background-color: #fdfdfd; font-size: 12pt;"></td>
+            <td><input type="text" id="formula" style="border: none; width: 100%; height:100%; background-color: #fdfdfd; font-size: 12pt;"></td>
+            <td><input type="text" id="charge" style="border: none; width: 100%; height:100%; background-color: #fdfdfd; font-size: 12pt;"></td>
+        </tr>
+    </tbody>
+</table>
+<p id="correct_box" style="background-color: #057005; color: #fdfdfd; padding:2px; text-align: center;" hidden="true">Correct!</p>
+<p id="incorrect_box" style="background-color: #8c170c; color:#fdfdfd; padding:2px; text-align: center;" hidden="true">Incorrect!<br>abcd</p>
+
+<script>
+    // not using a separate js file because this should be small-ish
+    const nameInput = document.getElementById("name");
+    const formulaInput = document.getElementById("formula");
+    const chargeInput = document.getElementById("charge");
+    const startButton = document.getElementById("start_button");
+    const gradeText = document.getElementById("grade");
+    const correctBox = document.getElementById("correct_box");
+    const incorrectBox = document.getElementById("incorrect_box");
+
+    let loaded = false;
+    let testStarted = false;
+    let enterHasBeenPressed = false;
+    let examples = [];
+    let examples_len = 0;
+
+    let correct = 0;
+    // now populate the list, which comes from a text file
+    fetch("/assets/polyatomic_ions.txt").then((response)=>{
+        return response.text();
+    }).then((text) => {
+        const polyatomic_ions = text.split("\n");
+        // construct list.
+        for (let ion_i = 0; ion_i < polyatomic_ions.length; ion_i++) {
+            // each row of the txt contains name,formula,charge
+            // split by commas into length 3 list.
+            let ion_example = polyatomic_ions[ion_i].split(",");
+            ion_example[2] = parseInt(ion_example[2], 10);
+            examples.push(ion_example);
+        }
+
+        examples_len = examples.length;
+        // update total questions in grade
+        gradeText.textContent = "Your grade: -/" + examples_len.toString();
+    });
+
+    // wait until list exists.
+    let waitInterval = setInterval(() => {
+        if (examples_len != 0) {
+            clearInterval(waitInterval);
+            loaded = true;
+            startButton.disabled = false;
+            startButton.textContent = "start";
+        }
+    }, 10);
+
+    function shuffled(l) {
+        let outList = [...examples]; // make copy
+        // regular fisher yates shuffle
+        for (let i = l.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            // swap
+            [outList[i], outList[j]] = [outList[j], outList[i]];
+        }
+        return outList;
+    }
+
+    async function getUserSubmissionForExample(input1, input2) {
+        // keep doing this until user decides to submit
+        while (true) {
+            // wait for enter, to switch focus
+            await new Promise((resolve) => {
+                function waitForEnter(keyevent) {
+                    if (keyevent.key == "Enter") {
+                        document.removeEventListener("keydown", waitForEnter);
+                        resolve(keyevent);
+                    }
+                }
+                document.addEventListener("keydown", waitForEnter);
+            })
+
+            // switch focus to charge or grade, depending on currently focused element
+            let focusedElement = document.activeElement;
+            if (focusedElement === input1) {
+                input2.focus();
+            } else {
+                break;
+            }
+        }
+    }
+
+    // why does it suddenly start being async? idk
+    async function startTest() {
+        // skip if examples aren't loaded
+        if (!loaded) {
+            return;
+        }
+        if (testStarted) {
+            return;
+        }
+        testStarted = true;
+        correct = 0;
+
+        // reset grade
+        gradeText.textContent = "Your grade: -/" + examples_len.toString();
+
+        startButton.textContent = "finish first (or reload)";
+        startButton.disabled=true;
+
+        // shuffle
+        let shuffled_examples = shuffled(examples);
+
+        for (const example of shuffled_examples) {
+            // clear for next round
+            nameInput.value = "";
+            formulaInput.value = "";
+            chargeInput.value = "";
+
+            // write the same code twice based on which one to hide, mostly
+            if (Math.random() < 0.5) {
+                // hide name/show formula
+                formulaInput.value = example[1];
+                formulaInput.disabled=true;
+                // focus on name
+                nameInput.focus();
+
+                await getUserSubmissionForExample(nameInput, chargeInput);
+
+                formulaInput.disabled=false;
+            } else {
+                // hide formula/show name
+                nameInput.value = example[0];
+                nameInput.disabled=true;
+                // focus on formula
+                formulaInput.focus();
+
+                await getUserSubmissionForExample(formulaInput, chargeInput);
+                nameInput.disabled=false;
+            }
+
+            // check correctness
+            if (nameInput.value.trim().toLowerCase() === example[0] &&
+                formulaInput.value.trim().toLowerCase() === example[1] &&
+                parseInt(chargeInput.value, 10) === example[2]) {
+                correct++;
+
+                correctBox.hidden=false;
+                incorrectBox.hidden=true;
+            } else {
+                correctBox.hidden=true;
+                incorrectBox.hidden=false;
+                incorrectBox.innerHTML = "Incorrect! correct answer is: " + example[0] + " " + example[1] + " " + example[2].toString() +
+                    "<br>(you wrote " + nameInput.value + " " + formulaInput.value + " " + chargeInput.value + ")";
+            }
+        }
+
+        // after everything, clear
+        nameInput.value = "";
+        formulaInput.value = "";
+        chargeInput.value = "";
+        
+        // update grade
+        gradeText.textContent = "Your grade: " + correct.toString() + "/" + examples_len.toString();
+
+        startButton.textContent="start";
+        startButton.disabled=false;
+
+        // can start new test
+        testStarted=false;
+    }
+</script>
