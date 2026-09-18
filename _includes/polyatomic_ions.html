@@ -19,6 +19,16 @@
 <p id="correct_box" style="background-color: #057005; color: #fdfdfd; padding:2px; text-align: center;" hidden="true">Correct!</p>
 <p id="incorrect_box" style="background-color: #8c170c; color:#fdfdfd; padding:2px; text-align: center;" hidden="true">Incorrect!<br>abcd</p>
 
+<table id="guess_summary" hidden="true">
+    <thead>
+        <td style="width:6%"></td>
+        <td style="width:50%">Your guess</td>
+        <td style="width:44%">Answer</td>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
 <script>
     // not using a separate js file because this should be small-ish
     const nameInput = document.getElementById("name");
@@ -28,12 +38,16 @@
     const gradeText = document.getElementById("grade");
     const correctBox = document.getElementById("correct_box");
     const incorrectBox = document.getElementById("incorrect_box");
+    const guessTable = document.getElementById("guess_summary");
+    const guessBody = guessTable.children[1];
 
     let loaded = false;
     let testStarted = false;
     let enterHasBeenPressed = false;
     let examples = [];
     let examples_len = 0;
+
+    let guessHistory = [];
 
     let correct = 0;
     // now populate the list, which comes from a text file
@@ -100,6 +114,29 @@
         }
     }
 
+    function checkCorrect(guess, answer) {
+        return guess[0].trim().toLowerCase() === answer[0] && guess[1].trim().toLowerCase() === answer[1] && parseInt(guess[2], 10) === answer[2];
+    }
+
+    function showGuessHistory(guess, answer) {
+        for (let i = 0; i < examples_len; i++) {
+            newRow = guessBody.insertRow(-1);
+            newRow.insertCell(-1);
+            newRow.insertCell(-1);
+            newRow.insertCell(-1);
+
+            if (checkCorrect(guess[i], answer[i])){
+                newRow.cells[0].style.backgroundColor = "#057005";
+            } else {
+                newRow.cells[0].style.backgroundColor = "#8c170c";
+            }
+            newRow.cells[1].textContent = guess[i].join(" ");
+            newRow.cells[2].textContent = answer[i].join(" ");
+        }
+
+        guessTable.hidden=false;
+    }
+
     // why does it suddenly start being async? idk
     async function startTest() {
         // skip if examples aren't loaded
@@ -112,11 +149,19 @@
         testStarted = true;
         correct = 0;
 
+        // reset guess history
+        guessBody.innerHTML = "";
+
         // reset grade
         gradeText.textContent = "Your grade: -/" + examples_len.toString();
 
         startButton.textContent = "finish first (or reload)";
         startButton.disabled=true;
+
+        // hide things
+        guessTable.hidden=true;
+        correctBox.hidden=true;
+        incorrectBox.hidden=true;
 
         // shuffle
         let shuffled_examples = shuffled(examples);
@@ -150,9 +195,7 @@
             }
 
             // check correctness
-            if (nameInput.value.trim().toLowerCase() === example[0] &&
-                formulaInput.value.trim().toLowerCase() === example[1] &&
-                parseInt(chargeInput.value, 10) === example[2]) {
+            if (checkCorrect([nameInput.value, formulaInput.value, chargeInput.value], example)) {
                 correct++;
 
                 correctBox.hidden=false;
@@ -163,6 +206,9 @@
                 incorrectBox.innerHTML = "Incorrect! correct answer is: " + example[0] + " " + example[1] + " " + example[2].toString() +
                     "<br>(you wrote " + nameInput.value + " " + formulaInput.value + " " + chargeInput.value + ")";
             }
+
+            // add to the running guess history
+            guessHistory.push([nameInput.value, formulaInput.value, chargeInput.value]);
         }
 
         // after everything, clear
@@ -170,6 +216,9 @@
         formulaInput.value = "";
         chargeInput.value = "";
         
+        // update guess history
+        showGuessHistory(guessHistory, shuffled_examples);
+
         // update grade
         gradeText.textContent = "Your grade: " + correct.toString() + "/" + examples_len.toString();
 
