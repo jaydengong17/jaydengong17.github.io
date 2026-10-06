@@ -53,10 +53,11 @@
 
     let startTime = 0;
     // store best time in localStorage
-    if (localStorage.getItem("best-time") !== "null"){
-        // show time. Large line of code.
-        timeText.textContent = "Time: --:--.--- (best " + formatTime(parseInt(localStorage.getItem("best-time"))) + ")";
+    if (localStorage.getItem("best-time") === null){
+        localStorage.setItem("best-time", null);
     }
+    // show time. Large line of code.
+    timeText.textContent = "Time: --:--.--- (best " + formatTime(parseFloat(localStorage.getItem("best-time"))) + ")";
 
     let correct = 0;
     // now populate the list, which comes from a text file
@@ -128,6 +129,9 @@
     }
 
     function formatTime(t) {
+        if (isNaN(t)) {
+            return "--:--.---";
+        }
         if (t >= 60000) { // more than a minute
             return Math.floor(t / 60000).toString() + ":" + ((t - 60 * Math.floor(t / 60))/1000).toString().padStart(6, "0");
         } else {
@@ -241,7 +245,7 @@
             }
         }
 
-        timeText.textContent = "Time: " + formatTime(elapsed) + " (best " + formatTime(parseInt(localStorage.getItem("best-time"))) + ")";
+        timeText.textContent = "Time: " + formatTime(elapsed) + " (best " + formatTime(parseFloat(localStorage.getItem("best-time"))) + ")";
 
         // after everything, clear
         nameInput.value = "";
