@@ -12,9 +12,10 @@ Study your polyatomic ions!
 This list is a transcription of something off of the internet, probably more info than needed.
 Not completely finished.
 Email/dm me if you want to see more features.
+There is a 2 second penalty for each wrong answer.
 Some ions have multiple names, I just chose one of them
 (hydrogen sulfate is also bisulfate, hydrogen carbonate is also bicarbonate).
-Acetate also has both CH3COO and C2H3O2 as valid formulas, just use C2H3O2.
+Also, (certain ion) has both CH3COO and C2H3O2 as valid formulas, just use C2H3O2.
 
 How to use this: just press enter after each bit,
 for example you can press enter after filling in the name to focus on the charge quicker.

@@ -1,5 +1,6 @@
 <button id="start_button" onclick="startTest()" disabled="true">loading ions...</button>
-<span id="grade">Your grade: -/-</span>
+<span id="grade">Your grade: &#45;&#45;/-</span>
+<span id="time">Time: &#45;&#45;:&#45;&#45;.&#45;&#45;&#45; (best &#45;&#45;:&#45;&#45;.&#45;&#45;&#45;)</span>
 
 <table id="that_table">
     <thead>
@@ -36,6 +37,7 @@
     const chargeInput = document.getElementById("charge");
     const startButton = document.getElementById("start_button");
     const gradeText = document.getElementById("grade");
+    const timeText = document.getElementById("time");
     const correctBox = document.getElementById("correct_box");
     const incorrectBox = document.getElementById("incorrect_box");
     const guessTable = document.getElementById("guess_summary");
@@ -48,6 +50,13 @@
     let examples_len = 0;
 
     let guessHistory = [];
+
+    let startTime = 0;
+    // store best time in localStorage
+    if (localStorage.getItem("best-time") !== "null"){
+        // show time. Large line of code.
+        timeText.textContent = "Time: --:--.--- (best " + formatTime(parseInt(localStorage.getItem("best-time"))) + ")";
+    }
 
     let correct = 0;
     // now populate the list, which comes from a text file
@@ -118,6 +127,14 @@
         return guess[0].trim().toLowerCase() === answer[0] && guess[1].trim().toLowerCase() === answer[1] && parseInt(guess[2], 10) === answer[2];
     }
 
+    function formatTime(t) {
+        if (t >= 60000) { // more than a minute
+            return Math.floor(t / 60000).toString() + ":" + ((t - 60 * Math.floor(t / 60))/1000).toString().padStart(6, "0");
+        } else {
+            return (t / 1000).toString() + " seconds";
+        }
+    }
+
     function showGuessHistory(guess, answer) {
         for (let i = 0; i < examples_len; i++) {
             newRow = guessBody.insertRow(-1);
@@ -138,7 +155,7 @@
     }
 
     // why does it suddenly start being async? idk
-    async function startTest() {
+    async function startTest() { // loooong function
         // skip if examples aren't loaded
         if (!loaded) {
             return;
@@ -154,6 +171,7 @@
 
         // reset grade
         gradeText.textContent = "Your grade: -/" + examples_len.toString();
+        guessHistory = [];
 
         startButton.textContent = "finish first (or reload)";
         startButton.disabled=true;
@@ -162,6 +180,8 @@
         guessTable.hidden=true;
         correctBox.hidden=true;
         incorrectBox.hidden=true;
+
+        startTime = Date.now();
 
         // shuffle
         let shuffled_examples = shuffled(examples);
@@ -210,6 +230,18 @@
             // add to the running guess history
             guessHistory.push([nameInput.value, formulaInput.value, chargeInput.value]);
         }
+
+        // timing
+        elapsed = Date.now() - startTime + 5000 * (examples_len - correct)
+        if (localStorage.getItem("best-time") === "null") {
+            localStorage.setItem("best-time", elapsed);
+        } else {
+            if (parseFloat(localStorage.getItem("best-time")) > elapsed) {
+                localStorage.setItem("best-time", elapsed);
+            }
+        }
+
+        timeText.textContent = "Time: " + formatTime(elapsed) + " (best " + formatTime(parseInt(localStorage.getItem("best-time"))) + ")";
 
         // after everything, clear
         nameInput.value = "";
