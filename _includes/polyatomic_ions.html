@@ -133,7 +133,7 @@
             return "--:--.---";
         }
         if (t >= 60000) { // more than a minute
-            return Math.floor(t / 60000).toString() + ":" + ((t - 60 * Math.floor(t / 60))/1000).toString().padStart(6, "0");
+            return Math.floor(t / 60000).toString() + ":" + ((t - 60000 * Math.floor(t / 60000))/1000).toFixed(3).padStart(6, "0");
         } else {
             return (t / 1000).toString() + " seconds";
         }
