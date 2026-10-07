@@ -24,7 +24,7 @@ Which list to test on?
         </tr>
     </tbody>
 </table>
-<p id="correct_box" style="background-color: #057005; color: #fdfdfd; padding:2px; text-align: center;" hidden="true">Correct!</p>
+<p id="correct_box" style="background-color: #43c08a; color: #fdfdfd; padding:2px; text-align: center;" hidden="true">Correct!</p>
 <p id="incorrect_box" style="background-color: #8c170c; color:#fdfdfd; padding:2px; text-align: center;" hidden="true">Incorrect!<br>abcd</p>
 
 <table id="guess_summary" hidden="true">
@@ -50,7 +50,7 @@ Which list to test on?
     const guessTable = document.getElementById("guess_summary");
     const guessBody = guessTable.children[1];
     const listSelect = document.getElementById("which_list");
-    const loadButton = document.getElementById("start_button");
+    const loadButton = document.getElementById("load_button");
     
 
     let loaded = false;
@@ -183,7 +183,7 @@ Which list to test on?
             newRow.insertCell(-1);
 
             if (checkCorrect(guess[i], answer[i])){
-                newRow.cells[0].style.backgroundColor = "#057005";
+                newRow.cells[0].style.backgroundColor = "#43c08a";
             } else {
                 newRow.cells[0].style.backgroundColor = "#8c170c";
             }
@@ -215,6 +215,8 @@ Which list to test on?
 
         startButton.textContent = "finish first (or reload)";
         startButton.disabled=true;
+        loadButton.textContent = "finish first (or reload)";
+        loadButton.disabled=true;
 
         // hide things
         guessTable.hidden=true;
@@ -296,6 +298,8 @@ Which list to test on?
 
         startButton.textContent="start";
         startButton.disabled=false;
+        loadButton.textContent="load";
+        loadButton.disabled=false;
 
         // can start new test
         testStarted=false;
