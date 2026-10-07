@@ -1,5 +1,12 @@
-<button id="start_button" onclick="startTest()" disabled="true">loading ions...</button>
-<span id="grade">Your grade: &#45;&#45;/-</span>
+Which list to test on?
+<select id="which_list">
+  <option value="og">OG list</option>
+  <option value="short" selected>Short list</option>
+</select>
+<button id="load_button" onclick="loadTest()">load</button>
+
+<button id="start_button" onclick="startTest()" disabled="true">press load button</button>
+<span id="grade">Your grade: &#45;&#45;/&#45;&#45;</span>
 <span id="time">Time: &#45;&#45;:&#45;&#45;.&#45;&#45;&#45; (best &#45;&#45;:&#45;&#45;.&#45;&#45;&#45;)</span>
 
 <table id="that_table">
@@ -42,12 +49,22 @@
     const incorrectBox = document.getElementById("incorrect_box");
     const guessTable = document.getElementById("guess_summary");
     const guessBody = guessTable.children[1];
+    const listSelect = document.getElementById("which_list");
+    const loadButton = document.getElementById("start_button");
+    
 
     let loaded = false;
     let testStarted = false;
     let enterHasBeenPressed = false;
+    
+    const example_paths = ["/assets/polyatomic_ions.txt", "/assets/polyatomic_ions_small.txt"];
+    const example_names = ["og", "short"];
+    const example_times = ["best-time", "best-time-short"];
+
+    // these will hold the examples for the current loaded thing
     let examples = [];
     let examples_len = 0;
+    let example_time = "best-time";
 
     let guessHistory = [];
 
@@ -56,38 +73,57 @@
     if (localStorage.getItem("best-time") === null){
         localStorage.setItem("best-time", null);
     }
-    // show time. Large line of code.
-    timeText.textContent = "Time: --:--.--- (best " + formatTime(parseFloat(localStorage.getItem("best-time"))) + ")";
+    // do this again for short.
+    if (localStorage.getItem("best-time-short") === null){
+        localStorage.setItem("best-time-short", null);
+    }
 
     let correct = 0;
-    // now populate the list, which comes from a text file
-    fetch("/assets/polyatomic_ions.txt").then((response)=>{
-        return response.text();
-    }).then((text) => {
-        const polyatomic_ions = text.split("\n");
-        // construct list.
-        for (let ion_i = 0; ion_i < polyatomic_ions.length; ion_i++) {
-            // each row of the txt contains name,formula,charge
-            // split by commas into length 3 list.
-            let ion_example = polyatomic_ions[ion_i].split(",");
-            ion_example[2] = parseInt(ion_example[2], 10);
-            examples.push(ion_example);
-        }
 
-        examples_len = examples.length;
-        // update total questions in grade
-        gradeText.textContent = "Your grade: -/" + examples_len.toString();
-    });
+    function loadTest() {
+        // get selected one
+        load(example_names.indexOf(listSelect.value));
+    }
 
-    // wait until list exists.
-    let waitInterval = setInterval(() => {
-        if (examples_len != 0) {
-            clearInterval(waitInterval);
-            loaded = true;
-            startButton.disabled = false;
-            startButton.textContent = "start";
-        }
-    }, 10);
+    // i is the ith path of the example_paths list
+    function load(example_i) {
+        loaded = false;
+        startButton.disabled = true;
+        startButton.textContent = "press load button";
+
+        examples = [];
+        // now populate the list, which comes from a text file
+        fetch(example_paths[example_i]).then((response)=>{
+            return response.text();
+        }).then((text) => {
+            const polyatomic_ions = text.split("\n");
+            // construct list.
+            for (let ion_i = 0; ion_i < polyatomic_ions.length; ion_i++) {
+                // each row of the txt contains name,formula,charge
+                // split by commas into length 3 list.
+                let ion_example = polyatomic_ions[ion_i].split(",");
+                ion_example[2] = parseInt(ion_example[2], 10);
+                examples.push(ion_example);
+            }
+
+            examples_len = examples.length;
+            example_time = example_times[example_i];
+            // update total questions in grade
+            gradeText.textContent = "Your grade: -/" + examples_len.toString();
+            // show time. Large line of code.
+            timeText.textContent = "Time: --:--.--- (best " + formatTime(parseFloat(localStorage.getItem(example_times[example_i]))) + ")";
+        });
+
+        // wait until list exists.
+        let waitInterval = setInterval(() => {
+            if (examples_len != 0) {
+                clearInterval(waitInterval);
+                loaded = true;
+                startButton.disabled = false;
+                startButton.textContent = "start";
+            }
+        }, 10);
+    }
 
     function shuffled(l) {
         let outList = [...examples]; // make copy
@@ -237,15 +273,15 @@
 
         // timing
         elapsed = Date.now() - startTime + 5000 * (examples_len - correct)
-        if (localStorage.getItem("best-time") === "null") {
-            localStorage.setItem("best-time", elapsed);
+        if (localStorage.getItem(example_time) === "null") {
+            localStorage.setItem(example_time, elapsed);
         } else {
-            if (parseFloat(localStorage.getItem("best-time")) > elapsed) {
-                localStorage.setItem("best-time", elapsed);
+            if (parseFloat(localStorage.getItem(example_time)) > elapsed) {
+                localStorage.setItem(example_time, elapsed);
             }
         }
 
-        timeText.textContent = "Time: " + formatTime(elapsed) + " (best " + formatTime(parseFloat(localStorage.getItem("best-time"))) + ")";
+        timeText.textContent = "Time: " + formatTime(elapsed) + " (best " + formatTime(parseFloat(localStorage.getItem(example_time))) + ")";
 
         // after everything, clear
         nameInput.value = "";
