@@ -161,7 +161,13 @@ Which list to test on?
     }
 
     function checkCorrect(guess, answer) {
-        return guess[0].trim().toLowerCase() === answer[0] && guess[1].trim().toLowerCase() === answer[1] && parseInt(guess[2], 10) === answer[2];
+        let textfieldsright = guess[0].trim().toLowerCase() === answer[0] && guess[1].trim().toLowerCase() === answer[1];
+        parsedGuess = parseInt(guess[2].trim(), 10);
+        // hack so that 1- is parsed as -1 and not 1
+        if (guess[2].trim().at(-1) === "-") {
+            parsedGuess *= -1;
+        }
+        return textfieldsright && parsedGuess === answer[2];
     }
 
     function formatTime(t) {

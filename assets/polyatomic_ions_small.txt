@@ -19,3 +19,4 @@ chromate,cro4,-2
 dichromate,cr2o7,-2
 permanganate,mno4,-1
 peroxide,o2,-2
+cyanide,cn,-1
